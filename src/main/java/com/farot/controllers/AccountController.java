@@ -94,6 +94,22 @@ public class AccountController {
       }
       return bytes;
   }
+
+  private static AccountModel getAccountByToken (String token) 
+  {
+    List<AccountModel> models = Sql2oModel.Account.getByToken(token);
+    if (models.size() > 0) {
+      AccountModel model = models.get(0);
+
+      model.last_login = new Date();
+
+      Sql2oModel.Account.update(model);
+
+      return model;
+    } else {
+      return null;
+    }
+  }
   
   public static Object createAccount (Request req, Response res) 
   {
@@ -135,6 +151,8 @@ public class AccountController {
 
           Sql2oModel.Account.update(model);
 
+          res.cookie("token", model.token);
+
           return new ResponseModel(1, new AccountResponseModel(model));
         } else {
           throw new Exception("No such password");
@@ -157,22 +175,25 @@ public class AccountController {
       String token = req.headers("FAROT-TOKEN");
 
       if (token != null) {
-        List<AccountModel> models = Sql2oModel.Account.getByToken(token);
-        if (models.size() > 0) {
-          AccountModel model = models.get(0);
-
-          model.last_login = new Date();
-
-          Sql2oModel.Account.update(model);
-
+        AccountModel model = getAccountByToken(token);
+        if (model != null) {
           return new ResponseModel(1, new AccountResponseModel(model));
         } else {
-          throw new Exception("No such user");
+          throw new Exception("No user with this token");
         }
       } else {
-        throw new Exception("No token");
+        String cookie = req.cookie("token");
+        if (cookie != null) {
+          AccountModel model = getAccountByToken(token);
+          if (model != null) {
+            return new ResponseModel(1, new AccountResponseModel(model));
+          } else {
+            throw new Exception("No user with this cookie");
+          }          
+        } else {
+          throw new Exception("No token or cookie");
+        }
       }
-
     } catch (Exception e) {
       return new ResponseModel(0, e);
     }
