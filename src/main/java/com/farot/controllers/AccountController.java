@@ -122,6 +122,7 @@ public class AccountController {
       model.pass       = generateStorngPasswordHash(model.pass);
       model.token      = RandomString.generateRandomString();
       model.last_login = new Date();
+      model.user_id    = UUID.randomUUID();
 
       System.out.println("Id: " + model.id + " password " + model.pass);
       

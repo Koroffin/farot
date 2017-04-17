@@ -12,6 +12,11 @@ public class AccountModel {
 
   public String login;
   public String pass;
-  public UUID user_id = null;
+  public UUID user_id;
   public String token = null;
+
+  public int gold;
+  public int gold_per_minute;
+  public int wood;
+  public int wood_per_minute;
 }

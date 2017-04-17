@@ -1,0 +1,8 @@
+ALTER TABLE users
+   ADD COLUMN gold integer;
+ALTER TABLE users
+   ADD COLUMN wood integer;
+ALTER TABLE users
+   ADD COLUMN gold_per_minute integer;
+ALTER TABLE users
+   ADD COLUMN wood_per_minute integer;
