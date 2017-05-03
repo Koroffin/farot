@@ -37,9 +37,9 @@ public class Sql2oModel {
       "(:id, :login, :pass, :last_login, :created_at, :updated_at, :user_id, :token)";
     private static String CREATE_USER_QUERY = 
       "insert into users" +
-      "(id, gold, gold_per_minute, wood, wood_per_minute, x, y, z) " +
+      "(id, gold, gold_per_minute, wood, wood_per_minute, x, y) " +
       "VALUES " +
-      "(:id, :gold, :gold_per_minute, :wood, :wood_per_minute, :x, :y, :z)";
+      "(:id, :gold, :gold_per_minute, :wood, :wood_per_minute, :x, :y)";
     private static String GET_BY_LOGIN_QUERY = 
       "select * from accounts " +
       "inner join users " +
@@ -66,7 +66,6 @@ public class Sql2oModel {
           .addParameter("wood_per_minute", Path.User.default_resources.WOOD_PER_MINUTE)
           .addParameter("x", Path.User.default_coordinates.X)
           .addParameter("y", Path.User.default_coordinates.Y)
-          .addParameter("z", Path.User.default_coordinates.Z)
           .executeUpdate();
 
         conn.createQuery(CREATE_ACCOUNT_QUERY)
