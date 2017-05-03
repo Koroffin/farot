@@ -19,4 +19,10 @@ public class AccountModel {
   public int gold_per_minute;
   public int wood;
   public int wood_per_minute;
+  
+  public int x;
+  public int y;
+  public int z;
+
+  public String name;
 }

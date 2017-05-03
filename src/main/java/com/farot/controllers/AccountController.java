@@ -24,6 +24,7 @@ import com.farot.models.AccountResponseModel;
 
 import com.farot.utils.Sql2oModel;
 import com.farot.utils.RandomString;
+import com.farot.utils.Auth;
 
 public class AccountController {
 
@@ -94,41 +95,30 @@ public class AccountController {
       }
       return bytes;
   }
-
-  private static AccountModel getAccountByToken (String token) 
-  {
-    List<AccountModel> models = Sql2oModel.Account.getByToken(token);
-    if (models.size() > 0) {
-      AccountModel model = models.get(0);
-
-      model.last_login = new Date();
-
-      Sql2oModel.Account.update(model);
-
-      return model;
-    } else {
-      return null;
-    }
-  }
   
-  public static Object createAccount (Request req, Response res) 
+  public static Object create (Request req, Response res) 
   {
     res.type("application/json");
 
     try {
       AccountModel model = gson.fromJson(req.body(), AccountModel.class);
 
-      model.id         = UUID.randomUUID();
-      model.pass       = generateStorngPasswordHash(model.pass);
-      model.token      = RandomString.generateRandomString();
-      model.last_login = new Date();
-      model.user_id    = UUID.randomUUID();
+      List<AccountModel> models = Sql2oModel.Account.getByLogin(model.login);
+      if (models.size() == 0) {
+        model.id         = UUID.randomUUID();
+        model.pass       = generateStorngPasswordHash(model.pass);
+        model.token      = RandomString.generateRandomString();
+        model.last_login = new Date();
+        model.user_id    = UUID.randomUUID();
 
-      System.out.println("Id: " + model.id + " password " + model.pass);
-      
-      Sql2oModel.Account.create(model);
+        System.out.println("Id: " + model.id + " password " + model.pass);
+        
+        Sql2oModel.Account.create(model);
 
-      return new ResponseModel(1, new AccountResponseModel(model));
+        return new ResponseModel(1, new AccountResponseModel(model));        
+      } else {
+        throw new Exception("User with this login already exists");
+      }
     } catch (Exception e) {
       return new ResponseModel(0, e);
     }
@@ -153,6 +143,7 @@ public class AccountController {
           Sql2oModel.Account.update(model);
 
           res.cookie("token", model.token);
+          req.session().attribute("user", model);
 
           return new ResponseModel(1, new AccountResponseModel(model));
         } else {
@@ -173,32 +164,29 @@ public class AccountController {
     res.type("application/json");
 
     try {
-      String token = req.headers("FAROT-TOKEN");
-
-      if (token != null) {
-        AccountModel model = getAccountByToken(token);
-        if (model != null) {
-          return new ResponseModel(1, new AccountResponseModel(model));
-        } else {
-          throw new Exception("No user with this token");
-        }
-      } else {
-        String cookie = req.cookie("token");
-        if (cookie != null) {
-          AccountModel model = getAccountByToken(token);
-          if (model != null) {
-            return new ResponseModel(1, new AccountResponseModel(model));
-          } else {
-            throw new Exception("No user with this cookie");
-          }          
-        } else {
-          throw new Exception("No token or cookie");
-        }
-      }
+      return new ResponseModel(1, new AccountResponseModel(Auth.getUser(req)));
     } catch (Exception e) {
       return new ResponseModel(0, e);
     }
 
+  }
+
+  public static Object logout (Request req, Response res)
+  {
+    res.type("application/json");
+    AccountModel user;
+
+    try {
+      user = Auth.getUser(req);
+      user.token = RandomString.generateRandomString();
+      Sql2oModel.Account.update(user);
+      res.removeCookie("token");
+      req.session().removeAttribute("user");
+    } catch (Exception e) {
+      return new ResponseModel(0, e);
+    }
+
+    return new ResponseModel(1, new AccountResponseModel(user));
   }
 
 }

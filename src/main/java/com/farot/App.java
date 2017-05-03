@@ -11,6 +11,7 @@ import com.farot.utils.Path;
 
 import com.farot.controllers.UserController;
 import com.farot.controllers.AccountController;
+import com.farot.controllers.MapController;
 
 public class App 
 {
@@ -36,7 +37,8 @@ public class App
         }
 
         return "OK";
-      });
+      }
+    );
 
     before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
   }
@@ -48,15 +50,27 @@ public class App
     enableCORS();
 
     post(Path.Web.api.Account.DEFAULT, (req, res) -> { 
-      return AccountController.createAccount(req, res); 
+      return AccountController.create(req, res); 
     }, gson::toJson);
-
     post(Path.Web.api.Account.AUTH, (req, res) -> { 
       return AccountController.auth(req, res); 
     }, gson::toJson);
-
     get(Path.Web.api.Account.AUTH, (req, res) -> { 
       return AccountController.checkAuth(req, res); 
+    }, gson::toJson);
+    post(Path.Web.api.Account.LOGOUT, (req, res) -> { 
+      return AccountController.logout(req, res); 
+    }, gson::toJson);
+
+    post(Path.Web.api.User.NAME, (req, res) -> { 
+      return UserController.setName(req, res); 
+    }, gson::toJson);
+
+    get(Path.Web.api.Map.DEFAULT, (req, res) -> { 
+      return MapController.get(req, res); 
+    }, gson::toJson);
+    post(Path.Web.api.Map.MOVE, (req, res) -> { 
+      return MapController.move(req, res); 
     }, gson::toJson);
 
     exception(Exception.class, (e, request, response) -> {

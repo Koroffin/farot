@@ -1,8 +1,24 @@
 ALTER TABLE users
-   ADD COLUMN gold integer;
+   ADD COLUMN x integer;
 ALTER TABLE users
-   ADD COLUMN wood integer;
+   ADD COLUMN y integer;
 ALTER TABLE users
-   ADD COLUMN gold_per_minute integer;
-ALTER TABLE users
-   ADD COLUMN wood_per_minute integer;
+   ADD COLUMN name text;
+
+CREATE TABLE map
+(
+  x integer,
+  y integer,
+  type integer,
+  unit_id uuid
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE map
+  OWNER TO postgres;
+
+CREATE INDEX map_x_y_idx
+  ON map
+  USING btree
+  (x, y);

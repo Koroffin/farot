@@ -34,11 +34,23 @@ public class Path {
 
         public static String AUTH    = "/api/account/auth/";  
 
+        public static String LOGOUT  = "/api/account/logout/";  
+
       }
 
       public static class User {
 
         public static String DEFAULT = "/api/user/";
+
+        public static String NAME = "/api/user/name/";
+
+      }
+
+      public static class Map {
+        
+        public static String DEFAULT = "/api/map/";
+
+        public static String MOVE = "/api/map/move/";
 
       }
 
@@ -55,6 +67,13 @@ public class Path {
 
       public static int WOOD = 5;
       public static int WOOD_PER_MINUTE = 0;
+    
+    }
+
+    public static class default_coordinates {
+      public static int X = 0;
+      public static int Y = 0;
+      public static int Z = 0;
     }
 
   }
