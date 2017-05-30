@@ -2,6 +2,12 @@ package com.farot;
 
 import java.util.HashMap;
 import java.util.UUID;
+import java.net.URL;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.charset.Charset;
+import java.io.IOException;
 
 import com.google.gson.Gson;
 
@@ -43,11 +49,31 @@ public class App
     before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
   }
 
+  private static String renderIndex() {
+    try {
+      URL url = App.class.getResource("index.html");
+      return new String(Files.readAllBytes(Paths.get(url.toURI())), Charset.defaultCharset());
+    } catch (IOException | URISyntaxException e) {
+      System.out.println(e.getMessage());
+    }
+    return null;
+  }
+
   public static void main( String[] args )
   {
     staticFiles.location("/public");
 
     enableCORS();
+
+    before((req, res) -> {
+      String path = req.pathInfo();
+      if (path.endsWith("/"))
+        res.redirect(path.substring(0, path.length() - 1));
+    });
+
+    // Site pages
+    get("/", "text/html", (req, res) -> renderIndex());
+    get("/login", "text/html", (req, res) -> renderIndex());
 
     post(Path.Web.api.Account.DEFAULT, (req, res) -> { 
       return AccountController.create(req, res); 

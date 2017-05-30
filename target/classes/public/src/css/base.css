@@ -11,13 +11,13 @@ body {
 	color: #fff;
 }
 
-#loader {
+.loader {
 	width: 100%;
 	height: 100%;
 	display: none;
 	background: url(/img/gears.gif) center center no-repeat;
 }
 
-.loading #loader {
+.loading .loader {
 	display: block;
 }

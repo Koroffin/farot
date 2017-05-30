@@ -2,6 +2,7 @@ F.define('components/router', function (Router) {
 
 	Router.state('login');
 	Router.state('game');
+	Router.state('registration');
 	
 	Router.overwise(function () {
 		F.api('account/auth/').then(function (res) {

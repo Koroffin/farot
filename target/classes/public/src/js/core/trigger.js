@@ -1,5 +1,15 @@
 (function (context) {
 	var handlers = { };
+
+	function OffHandler (eventName, ts) {
+		this.ts = ts;
+		this.eventName = eventName;
+		return this;
+	}
+	OffHandler.prototype.off = function () {
+		_off(this.eventName, this.ts);
+	}
+
 	function _eachHandler (eventName, fn) {
 		var arr = handlers[eventName];
 		if (F.isArray(arr)) {
@@ -19,7 +29,7 @@
 			fn: fn,
 			ts: ts
 		});
-		return ts;
+		return new OffHandler(eventName, ts);
 	}
 	function _off (eventName, ts) {
 		_eachHandler(eventName, function (token, i) {
@@ -36,7 +46,6 @@
 	}
 
 	context.on = _on;
-	context.off = _off;
 	context.trigger = _trigger;
 
 })(F);

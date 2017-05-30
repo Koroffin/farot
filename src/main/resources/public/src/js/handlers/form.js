@@ -46,8 +46,6 @@ F.define('core/events', 'core/trigger', function () {
 			name = form.name,
 			data = _getFormData(form),
 			action = _cutAction(form.action);
-		
-		console.log('action: ', action);
 
 		if (!F.isEmpty(action)) {
 			F.trigger('submit:' + name, { target: form });

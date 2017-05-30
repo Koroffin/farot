@@ -1,8 +1,9 @@
 F.define(
 	'components/module', 
+	'components/router',
 	'plain!./templates/main.html', 
 	'core/trigger',
-function (Module, tpl) {
+function (Module, Router, tpl) {
 	var LoginModule,
 		offSubmitLoginFormSuccess, offSubmitLoginFormError;
 
@@ -10,7 +11,7 @@ function (Module, tpl) {
 		tpl: tpl,
 		afterStart: function (module, data, callback) {
 			offSubmitLoginFormSuccess = F.on('submit:LoginForm:success', function () {
-				console.log('here res: ', res);
+				Router.navigate('game');
 			});
 			offSubmitLoginFormError = F.on('submit:LoginForm:error', function () {
 				console.log('here res error: ', res);
@@ -18,8 +19,8 @@ function (Module, tpl) {
 			callback();
 		},
 		afterDestroy: function () {
-			F.off('submit:LoginForm:success', offSubmitLoginFormSuccess);
-			F.off('submit:LoginForm:error', offSubmitLoginFormError);
+			offSubmitLoginFormSuccess.off();
+			offSubmitLoginFormError.off();
 		}
 	});
 

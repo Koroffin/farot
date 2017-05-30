@@ -1,4 +1,7 @@
-F.define('handlers/form', function (FormHandler) {
+F.define(
+	'handlers/form', 
+	'handlers/a',
+function (FormHandler, AHandler) {
 
 	var previousModule;
 
@@ -13,7 +16,8 @@ F.define('handlers/form', function (FormHandler) {
 		this.el = this.render();
 
 		this.handlers = [
-			new FormHandler(this.el)
+			new FormHandler(this.el),
+			new AHandler(this.el)
 		];
 
 		F.root.appendChild(this.el);
@@ -32,6 +36,7 @@ F.define('handlers/form', function (FormHandler) {
 		for (var i=0, l=this.handlers.length; i<l; i++) {
 			this.handlers[i].destroy();
 		}
+		F.root.removeChild(this.el);
 		F.isFunction(this.options.afterDestroy) && this.options.afterDestroy();
 	}
 
