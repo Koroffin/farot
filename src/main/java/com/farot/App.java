@@ -51,10 +51,11 @@ public class App
 
   private static String renderIndex() {
     try {
-      URL url = App.class.getResource("index.html");
+      URL url = App.class.getResource("/public/index.html");
+      System.out.println(new String(Files.readAllBytes(Paths.get(url.toURI())), Charset.defaultCharset()));
       return new String(Files.readAllBytes(Paths.get(url.toURI())), Charset.defaultCharset());
     } catch (IOException | URISyntaxException e) {
-      System.out.println(e.getMessage());
+      System.out.println("wtf: " + e.getMessage());
     }
     return null;
   }
@@ -73,8 +74,11 @@ public class App
 
     // Site pages
     get("/", "text/html", (req, res) -> renderIndex());
-    get("/login", "text/html", (req, res) -> renderIndex());
+    get("/login", "text/html", (req, res) -> "yo");
+    get("/game", "text/html", (req, res) -> renderIndex());
+    get("/registration", "text/html", (req, res) -> renderIndex());
 
+    // API routes
     post(Path.Web.api.Account.DEFAULT, (req, res) -> { 
       return AccountController.create(req, res); 
     }, gson::toJson);
