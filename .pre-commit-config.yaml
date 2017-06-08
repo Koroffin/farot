@@ -1,0 +1,13 @@
+-   repo: git://github.com/pre-commit/mirrors-jshint
+    sha: v2.9.4
+    hooks:
+    -   id: jshint
+        language_version: 4.2.2
+        exclude: ^src/main/resources/public/src/js/libs/.*
+-   repo: git@github.com:pre-commit/pre-commit-hooks
+    sha: v0.8.0
+    hooks:
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+    -   id: check-merge-conflict
+    -   id: check-yaml

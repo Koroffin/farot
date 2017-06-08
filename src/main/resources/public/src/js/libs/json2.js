@@ -156,7 +156,7 @@ if (typeof JSON !== "object") {
 }
 
 (function () {
-    "use strict";
+    'use strict';
 
     var rx_one = /^[\],:{}\s]*$/;
     var rx_two = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;

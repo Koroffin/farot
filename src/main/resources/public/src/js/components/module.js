@@ -1,49 +1,55 @@
 F.define(
-	'handlers/form', 
-	'handlers/a',
+    'handlers/form',
+    'handlers/a',
 function (FormHandler, AHandler) {
+    'use strict';
+    var previousModule;
 
-	var previousModule;
+    function Module (options) {
+        this.options = options;
+        return this;
+    }
+    Module.prototype = {
+        start: function (data, callback) {
+            this.stop();
+            previousModule = this;
+            this.el = this.render();
 
-	function Module (options) {
-		this.options = options;
-		return this;
-	}
+            this.handlers = [
+                new FormHandler(this.el),
+                new AHandler(this.el)
+            ];
 
-	function start (data, callback) {
-		this.stop();
-		previousModule = this;
-		this.el = this.render();
+            F.root.appendChild(this.el);
 
-		this.handlers = [
-			new FormHandler(this.el),
-			new AHandler(this.el)
-		];
+            if (F.isFunction(this.options.afterStart)) {
+                this.options.afterStart(this, data, callback);
+            } else {
+                callback();
+            }
+        },
+        render: function () {
+            var container = document.createElement('div');
+            container.innerHTML = this.options.tpl;
+            return container;
+        },
+        stop: function () {
+            if (previousModule) {
+                previousModule.destroy();
+            }
+        },
+        destroy: function () {
+            for (var i=0, l=this.handlers.length; i<l; i++) {
+                this.handlers[i].destroy();
+            }
 
-		F.root.appendChild(this.el);
+            F.root.removeChild(this.el);
 
-		F.isFunction(this.options.afterStart) ? this.options.afterStart(this, data, callback) : callback();
-	}
-	function render () {
-		var container = document.createElement('div');
-		container.innerHTML = this.options.tpl;
-		return container;
-	}
-	function stop () {
-		previousModule && previousModule.destroy();
-	}
-	function destroy () {
-		for (var i=0, l=this.handlers.length; i<l; i++) {
-			this.handlers[i].destroy();
-		}
-		F.root.removeChild(this.el);
-		F.isFunction(this.options.afterDestroy) && this.options.afterDestroy();
-	}
+            if (F.isFunction(this.options.afterDestroy)) {
+                this.options.afterDestroy();
+            }
+        }
+    };
 
-	Module.prototype.start = start;
-	Module.prototype.render = render;
-	Module.prototype.stop = stop;
-	Module.prototype.destroy = destroy;
-
-	return Module;
+    return Module;
 });
