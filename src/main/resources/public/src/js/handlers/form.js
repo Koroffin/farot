@@ -6,6 +6,7 @@ F.define(
     'core/attr',
     'core/val',
     'core/immediate',
+    'core/parent',
 function (InputAnyChange) {
     'use strict';
 
@@ -14,14 +15,28 @@ function (InputAnyChange) {
     function _cutAction (action) {
         return action.replace(new RegExp('^' + origin + '/', 'g'), '');
     }
+    function _validateForm (form) {
+        var elements = form.elements;
+        for (var i=0, l=elements.length; i<l; i++) {
+            if (F.hasClass(elements[i], 'f-error')) {
+                F.addClass(form, 'f-error');
+                return false;
+            }
+        }
+        F.removeClass(form, 'f-error');
+        return true;
+    }
     function _setError (el) {
         F.addClass(el, 'f-error');
+        _validateForm(F.parent(el, 'form'));
     }
     function _removeError (el) {
         F.removeClass(el, 'f-error');
+        _validateForm(F.parent(el, 'form'));
     }
     function _validateRequire (e) {
         var el = e.target;
+        F.addClass(el, 'f-touched');
         F.immediate(function () {
             if (F.isEmpty(F.val(el))) {
                 _setError(el);
@@ -38,7 +53,7 @@ function (InputAnyChange) {
         for (var i=0, l=elements.length; i<l; i++) {
             element = elements[i];
             if (!F.isEmpty(element.name)) {
-                data[element.name] = element.value;
+                data[element.name] = F.val(element);
             }
         }
 
@@ -72,9 +87,11 @@ function (InputAnyChange) {
             element = elements[i];
 
             // check for require
-            if (!F.isEmpty(F.getAttr(element, 'required'))) {
-                objects.push(new InputAnyChange(element, _validateRequire));
+            if (F.isDefined(F.getAttr(element, 'required'))) {
+                objects.push(new InputAnyChange(element, _validateRequire, true));
             }
+
+            _validateForm(form);
         }
 
         return {
