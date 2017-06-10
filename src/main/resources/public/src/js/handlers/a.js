@@ -27,11 +27,13 @@ F.define('components/router', 'core/events', 'core/attr', function (Router) {
             }
         }
     };
-    A.prototype.destroy = function () {
-        var handled;
-        for (var i=0, l=this.handled.length; i<l; i++) {
-            handled = this.handled[i];
-            F.removeEvent(handled.click_handler);
+    A.prototype = {
+        destroy: function () {
+            var handled;
+            for (var i=0, l=this.handled.length; i<l; i++) {
+                handled = this.handled[i];
+                F.removeEvent(handled.click_handler);
+            }
         }
     };
 
