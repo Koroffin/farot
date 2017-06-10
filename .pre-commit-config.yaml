@@ -3,7 +3,7 @@
     hooks:
     -   id: jshint
         language_version: 4.2.2
-        exclude: ^src/main/resources/public/src/js/libs/.*
+        exclude: js/libs/.*
 -   repo: git@github.com:pre-commit/pre-commit-hooks
     sha: v0.8.0
     hooks:

@@ -29,7 +29,7 @@
         return variable instanceof Object;
     }
     function isString (variable) {
-        return variable instanceof String;
+        return typeof variable === 'string';
     }
 
     /*

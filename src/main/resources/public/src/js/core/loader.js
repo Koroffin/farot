@@ -53,6 +53,7 @@
         });
     }
     function loadPlain (name, callback, postfixes, context) {
+        console.log('here context');
         var path = getLoadPath(name, postfixes, context, '');
         F.send(path).then(function (res) {
             callback(res.responseText);
@@ -62,6 +63,7 @@
     }
 
     function load (name, callback, context) {
+        console.log('here context before: ', context, F.isString(context));
         context = F.isString(context) ? context : '';
         var arr    = name.split('!'),
             loader = arr[0];
@@ -82,7 +84,8 @@
     function _require () {
         var loaders = [ ],
             args = F.cloneArray(arguments),
-            callback = args.pop();
+            callback = args.pop(),
+            context = this;
 
         try {
             if (!F.isFunction(callback)) {
@@ -90,7 +93,8 @@
             }
 
             for (var i=0, l=args.length; i<l; i++) {
-                loaders.push(loadHandler(args[i], this));
+                console.log('context before handler: ', this);
+                loaders.push(loadHandler(args[i], context));
             }
 
             F.async(loaders).promise.then(function (files) {
@@ -105,7 +109,7 @@
             context = args.pop(),
             callback = args.pop(),
             promise = F.promise();
-
+        console.log('context: ', context);
         try {
             if (!F.isFunction(callback)) {
                 throw new Error('Define callback should be a function');

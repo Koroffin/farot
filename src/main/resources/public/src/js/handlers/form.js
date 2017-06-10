@@ -1,11 +1,12 @@
 F.define(
+    'helpers/input.any.change',
     'core/events',
     'core/class',
     'core/trigger',
     'core/attr',
     'core/val',
     'core/immediate',
-function () {
+function (InputAnyChange) {
     'use strict';
 
     // private helpers
@@ -13,17 +14,22 @@ function () {
     function _cutAction (action) {
         return action.replace(new RegExp('^' + origin + '/', 'g'), '');
     }
-    // function _validateRequire (e) {
-    //     var el = e.target;
-    //     F.immediate(function () {
-    //         var val = F.val(el);
-    //         if (F.isEmpty(val)) {
-    //             F.addClass(el, 'f-error');
-    //         } else {
-    //             F.removeClass(el, 'f-error');
-    //         }
-    //     });
-    // }
+    function _setError (el) {
+        F.addClass(el, 'f-error');
+    }
+    function _removeError (el) {
+        F.removeClass(el, 'f-error');
+    }
+    function _validateRequire (e) {
+        var el = e.target;
+        F.immediate(function () {
+            if (F.isEmpty(F.val(el))) {
+                _setError(el);
+            } else {
+                _removeError(el);
+            }
+        });
+    }
     function _getFormData (form) {
         var elements = form.elements,
             data = { },
@@ -59,19 +65,21 @@ function () {
     function _processForm (form) {
         var elements = form.elements,
             handlers = [ F.addEvent(form, 'submit', _onFormSubmit) ],
+            objects = [ ],
             element;
 
         for (var i=0, l=elements.length; i<l; i++) {
             element = elements[i];
 
             // check for require
-            // if (!F.isEmpty(F.getAttr(element, 'required'))) {
-
-            // }
+            if (!F.isEmpty(F.getAttr(element, 'required'))) {
+                objects.push(new InputAnyChange(element, _validateRequire));
+            }
         }
 
         return {
-            handlers: handlers
+            handlers: handlers,
+            objects: objects
         };
     }
 
@@ -83,11 +91,17 @@ function () {
         }
     }
     function destroy () {
-        var handlers;
+        var handlers, objects;
         for (var i=0, l=this.handled.length; i<l; i++) {
             handlers = this.handled[i].handlers;
+            objects = this.handled[i].objects;
+
             for (var j=0, _l=handlers.length; j<_l; j++) {
                 F.removeEvent(handlers[j]);
+            }
+
+            for (var k=0, __l=objects.length; k<__l; k++) {
+                objects[k].destroy();
             }
         }
     }
