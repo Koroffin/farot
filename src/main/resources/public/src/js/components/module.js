@@ -36,8 +36,8 @@ function (FormHandler, AHandler) {
         },
         render: function () {
             var container, tpl, 
-                re, match, matchStr, matchIndex, matchAttributes,
-                componentsHash, componentPath, componentAttributes;
+                re, match, matchStr, matchIndex, matchAttributes, matchAttribute,
+                componentsHash, componentPath, componentAttributes, componentAttribute;
 
             container = document.createElement('div');
             tpl = this.options.tpl;
@@ -54,7 +54,11 @@ function (FormHandler, AHandler) {
                 console.log('test index: ', tpl[matchIndex] + tpl[matchIndex + 1] + tpl[matchIndex + 2]);
                 console.log('array is: ', matchAttributes);
 
-
+                componentPath = 'basic/' + matchStr.replace(/\-/gi, '/');
+                componentAttributes = [ ];
+                for (var i = 0, l = matchAttributes.length; i < l; i++) {
+                    matchAttribute = matchAttributes[i].split('=');
+                }
             }
 
             container.innerHTML = tpl;
