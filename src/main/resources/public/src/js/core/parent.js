@@ -1,5 +1,5 @@
 (function (context) {
-	'use strict';
+    'use strict';
 
     function _parent (element, tagName) {
         var res = element.parentNode;

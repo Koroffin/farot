@@ -20,7 +20,7 @@ F.define('core/events', function () {
     InputAnyChange.prototype = {
         destroy: function () {
             var handlers = this.handlers;
-            for (var i=0, l=handlers.length; i<l; i++) {
+            for (var i = 0, l = handlers.length; i < l; i++) {
                 F.removeEvent(handlers[i]);
             }
         }

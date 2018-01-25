@@ -1,24 +1,23 @@
-ALTER TABLE users
-   ADD COLUMN x integer;
-ALTER TABLE users
-   ADD COLUMN y integer;
-ALTER TABLE users
-   ADD COLUMN name text;
+-- Table: public.accounts
 
-CREATE TABLE map
+DROP TABLE public.accounts;
+
+CREATE TABLE public.accounts
 (
-  x integer,
-  y integer,
-  type integer,
-  unit_id uuid
+    id uuid NOT NULL,
+    login text NOT NULL,
+    pass text NOT NULL,
+    last_login date,
+    created_at date,
+    updated_at date,
+    user_id uuid,
+    token text,
+    CONSTRAINT accounts_pkey PRIMARY KEY (id)
 )
 WITH (
-  OIDS=FALSE
-);
-ALTER TABLE map
-  OWNER TO postgres;
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
 
-CREATE INDEX map_x_y_idx
-  ON map
-  USING btree
-  (x, y);
+ALTER TABLE public.accounts
+    OWNER to postgres;

@@ -8,12 +8,15 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.charset.Charset;
 import java.io.IOException;
+import java.io.File;
+import java.util.Scanner;
+import java.io.InputStream;
 
 import com.google.gson.Gson;
 
 import static spark.Spark.*;
 
-import com.farot.utils.Path;
+import com.farot.constants.WebConstants;
 
 import com.farot.controllers.UserController;
 import com.farot.controllers.AccountController;
@@ -21,91 +24,132 @@ import com.farot.controllers.MapController;
 
 public class App 
 {
-  private static Gson gson = new Gson();
+    private static Gson gson = new Gson();
 
-  private static void enableCORS() {
+    private static void enableCORS() {
 
-    options("/*",
-      (request, response) -> {
+        options("/*",
+            (request, response) -> {
 
-        String accessControlRequestHeaders = request
-                .headers("Access-Control-Request-Headers");
-        if (accessControlRequestHeaders != null) {
-            response.header("Access-Control-Allow-Headers",
-                    accessControlRequestHeaders);
-        }
+                String accessControlRequestHeaders = request
+                                .headers("Access-Control-Request-Headers");
+                if (accessControlRequestHeaders != null) {
+                        response.header("Access-Control-Allow-Headers",
+                                        accessControlRequestHeaders);
+                }
 
-        String accessControlRequestMethod = request
-                .headers("Access-Control-Request-Method");
-        if (accessControlRequestMethod != null) {
-            response.header("Access-Control-Allow-Methods",
-                    accessControlRequestMethod);
-        }
+                String accessControlRequestMethod = request
+                                .headers("Access-Control-Request-Method");
+                if (accessControlRequestMethod != null) {
+                        response.header("Access-Control-Allow-Methods",
+                                        accessControlRequestMethod);
+                }
 
-        return "OK";
-      }
-    );
+                return "OK";
+            }
+        );
 
-    before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
-  }
-
-  private static String renderIndex() {
-    try {
-      URL url = App.class.getResource("/public/index.html");
-      System.out.println(new String(Files.readAllBytes(Paths.get(url.toURI())), Charset.defaultCharset()));
-      return new String(Files.readAllBytes(Paths.get(url.toURI())), Charset.defaultCharset());
-    } catch (IOException | URISyntaxException e) {
-      System.out.println("wtf: " + e.getMessage());
+        before((request, response) -> response.header("Access-Control-Allow-Origin", "*"));
     }
-    return null;
-  }
 
-  public static void main( String[] args )
-  {
-    staticFiles.location("/public");
+    public static URL getResource(String resourceName) {
+        URL url = Thread.currentThread().getContextClassLoader().getResource(resourceName);
 
-    enableCORS();
+        if (url == null) {
+            ClassLoader cl = App.class.getClass().getClassLoader();
 
-    before((req, res) -> {
-      String path = req.pathInfo();
-      if (path.endsWith("/"))
-        res.redirect(path.substring(0, path.length() - 1));
-    });
+            if (cl != null) {
+                url = cl.getResource(resourceName);
+            }
+        }
 
-    // Site pages
-    get("/", "text/html", (req, res) -> renderIndex());
-    get("/login", "text/html", (req, res) -> "yo");
-    get("/game", "text/html", (req, res) -> renderIndex());
-    get("/registration", "text/html", (req, res) -> renderIndex());
+        if ((url == null) && (resourceName != null) && ((resourceName.length() == 0) || (resourceName.charAt(0) != '/'))) { 
+            return getResource('/' + resourceName);
+        }
 
-    // API routes
-    post(Path.Web.api.Account.DEFAULT, (req, res) -> { 
-      return AccountController.create(req, res); 
-    }, gson::toJson);
-    post(Path.Web.api.Account.AUTH, (req, res) -> { 
-      return AccountController.auth(req, res); 
-    }, gson::toJson);
-    get(Path.Web.api.Account.AUTH, (req, res) -> { 
-      return AccountController.checkAuth(req, res); 
-    }, gson::toJson);
-    post(Path.Web.api.Account.LOGOUT, (req, res) -> { 
-      return AccountController.logout(req, res); 
-    }, gson::toJson);
+        return url;
+    }
+    public static InputStream getResourceAsStream(String resourceName) {
+        URL url = getResource(resourceName);
 
-    post(Path.Web.api.User.NAME, (req, res) -> { 
-      return UserController.setName(req, res); 
-    }, gson::toJson);
+        try {
+            return (url != null) ? url.openStream() : null;
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
-    get(Path.Web.api.Map.DEFAULT, (req, res) -> { 
-      return MapController.get(req, res); 
-    }, gson::toJson);
-    post(Path.Web.api.Map.MOVE, (req, res) -> { 
-      return MapController.move(req, res); 
-    }, gson::toJson);
+    private static String renderIndex() {
+        StringBuilder result = new StringBuilder("");
 
-    exception(Exception.class, (e, request, response) -> {
-      System.out.println("Got: " + e.getMessage() + " all!"); 
-    });
-  }
+        //Get file from resources folder
+        InputStream is = getResourceAsStream("public/index.html");
+
+        try (Scanner scanner = new Scanner(is)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                result.append(line).append("\n");
+            }
+
+            scanner.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result.toString();
+    }
+
+    public static void main( String[] args )
+    {
+        String indexPage = renderIndex();
+
+        staticFiles.location("/public");
+        port(80);
+
+        enableCORS();
+
+        before((req, res) -> {
+            String path = req.pathInfo();
+            if (path.endsWith("/"))
+                res.redirect(path.substring(0, path.length() - 1));
+        });
+
+        // Site pages
+        get("/", "text/html", (req, res) -> indexPage);
+        get("/login", "text/html", (req, res) -> indexPage);
+        get("/game", "text/html", (req, res) -> indexPage);
+        get("/registration", "text/html", (req, res) -> indexPage);
+
+        // API routes
+        post(WebConstants.api.Account.DEFAULT, (req, res) -> { 
+            return AccountController.create(req, res); 
+        }, gson::toJson);
+        post(WebConstants.api.Account.AUTH, (req, res) -> { 
+            System.out.println("Post to auth in router!");
+            return AccountController.auth(req, res); 
+        }, gson::toJson);
+        get(WebConstants.api.Account.AUTH, (req, res) -> { 
+            return AccountController.checkAuth(req, res); 
+        }, gson::toJson);
+        post(WebConstants.api.Account.LOGOUT, (req, res) -> { 
+            return AccountController.logout(req, res); 
+        }, gson::toJson);
+
+        post(WebConstants.api.User.NAME, (req, res) -> { 
+            return UserController.setName(req, res); 
+        }, gson::toJson);
+
+        get(WebConstants.api.Map.DEFAULT, (req, res) -> { 
+            return MapController.get(req, res); 
+        }, gson::toJson);
+        post(WebConstants.api.Map.MOVE, (req, res) -> { 
+            return MapController.move(req, res); 
+        }, gson::toJson);
+
+        exception(Exception.class, (e, request, response) -> {
+            System.out.println("Got: " + e.getMessage() + " all!"); 
+        });
+    }
 
 }

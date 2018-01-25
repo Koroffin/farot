@@ -28,9 +28,37 @@ function (FormHandler, AHandler) {
                 callback();
             }
         },
+        _renderComponent: function(componentName, tpl) {
+
+        },
+        _requireComponent: function() {
+
+        },
         render: function () {
-            var container = document.createElement('div');
-            container.innerHTML = this.options.tpl;
+            var container, tpl, 
+                re, match, matchStr, matchIndex, matchAttributes,
+                componentsHash, componentPath, componentAttributes;
+
+            container = document.createElement('div');
+            tpl = this.options.tpl;
+            componentsHash = { };
+
+            // Проверяем на компоненты
+            re = /<f-([^>]+)\s*>/gi;
+            while ((match = re.exec(tpl)) !== null) {
+                matchIndex = match.index;
+                matchStr = match[1].replace(/(\s{2,})|\n|\t/gi, ' ');
+                matchAttributes = matchStr.split(' ');
+
+                console.log('match custom component: ', matchStr, matchIndex);
+                console.log('test index: ', tpl[matchIndex] + tpl[matchIndex + 1] + tpl[matchIndex + 2]);
+                console.log('array is: ', matchAttributes);
+
+
+            }
+
+            container.innerHTML = tpl;
+
             return container;
         },
         stop: function () {

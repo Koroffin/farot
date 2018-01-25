@@ -1,6 +1,7 @@
 (function (scope) {
     'use strict';
-    var modules = { };
+    var modules = { },
+        loaders = { };
 
     function getLoadPath (name, postfixes, context, folder) {
         // check for relative path
@@ -11,38 +12,44 @@
         }
     }
     function loadJS (name, callback, postfixes, context) {
-        var path = getLoadPath(name, postfixes, context, 'js');
+        var path, loader;
+        path = getLoadPath(name, postfixes, context, 'js');
 
         if (F.isDefined(modules[path])) {
-            callback(modules[path]);
+            return callback(modules[path]);
+        } 
+        
+        if (F.isDefined(loaders[path])) {
+            loader = loaders[path];
         } else {
-            F.send(path).then(function (res) {
-                var plain = res.responseText;
-
-                // check if define module
-                var define_match = /F\.define\(/.exec(plain);
-                if (define_match && (define_match.index === 0)) {
-                    // add current path as context
-                    var last_char_match = /\)[^\)]+$/.exec(plain);
-                    eval(plain.substr(0, last_char_match.index) + ', "js/' + name + '");').then(function (result) {
-                        modules[path] = result;
-                        callback(result);
-                    });
-                } else {
-                    var s = document.createElement('script');
-                    s.innerHTML = plain;
-                    document.head.appendChild(s);
-                    modules[path] = null;
-                    callback(null);
-                }
-            }).catch(function () {
-                if (F.isEmpty(postfixes)) {
-                    F.error('Could not load file ' + name + ' in context ' + context);
-                } else {
-                    loadJS(name, callback, postfixes, context);
-                }
-            });
+            loader = loaders[path] = F.send(path);
         }
+        loader.then(function (res) {
+            var plain = res.responseText;
+
+            // check if define module
+            var define_match = /F\.define\(/.exec(plain);
+            if (define_match && (define_match.index === 0)) {
+                // add current path as context
+                var last_char_match = /\)[^\)]+$/.exec(plain);
+                eval(plain.substr(0, last_char_match.index) + ', "js/' + name + '");').then(function (result) {
+                    modules[path] = result;
+                    callback(result);
+                });
+            } else {
+                var s = document.createElement('script');
+                s.innerHTML = plain;
+                document.head.appendChild(s);
+                modules[path] = null;
+                callback(null);
+            }
+        }).catch(function () {
+            if (F.isEmpty(postfixes)) {
+                F.error('Could not load file ' + name + ' in context ' + context);
+            } else {
+                loadJS(name, callback, postfixes, context);
+            }
+        });
     }
     function loadJson (name, callback, postfixes, context) {
         var path = getLoadPath(name, postfixes, context, 'json');
@@ -90,7 +97,7 @@
                 throw new Error('Require callback should be a function');
             }
 
-            for (var i=0, l=args.length; i<l; i++) {
+            for (var i = 0, l = args.length; i < l; i++) {
                 loaders.push(loadHandler(args[i], context));
             }
 

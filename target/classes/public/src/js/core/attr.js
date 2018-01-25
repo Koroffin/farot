@@ -14,6 +14,10 @@
         return result;
     }
 
-    context.getAttr = getAttr;
+    function setAttr (ele, attr, value) {
+        ele.setAttribute(attr, value);
+    }
 
+    context.getAttr = getAttr;
+    context.setAttr = setAttr;
 })(F);

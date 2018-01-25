@@ -223,7 +223,11 @@
 
             try {
                 var json = JSON.parse(req.responseText);
-                p.execute(json);
+                if (json.success) {
+                    p.execute(json.data);
+                } else {
+                    p.executeError(json.data);
+                }                
             } catch (e) {
                 p.execute(req);
             }
@@ -237,7 +241,7 @@
         return p;
     }
     function api (url, postData) {
-        return send('http://koroffin.com:4567/api/' + url, postData);
+        return send('/api/' + url, postData);
     }
     function promise () {
         return new Promise();
