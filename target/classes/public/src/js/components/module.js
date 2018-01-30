@@ -12,37 +12,47 @@ function (FormHandler, AHandler) {
     }
     Module.prototype = {
         start: function (data, callback) {
+            var me = this;
             this.stop();
             previousModule = this;
-            this.el = this.render();
+            this.render(function (element) {
+                me.el = element;
+                me.handlers = [
+                    new FormHandler(me.el),
+                    new AHandler(me.el)
+                ];
 
-            this.handlers = [
-                new FormHandler(this.el),
-                new AHandler(this.el)
-            ];
+                F.root.appendChild(me.el);
 
-            F.root.appendChild(this.el);
-
-            if (F.isFunction(this.options.afterStart)) {
-                this.options.afterStart(this, data, callback);
-            } else {
-                callback();
+                if (F.isFunction(me.options.afterStart)) {
+                    me.options.afterStart(me, data, callback);
+                } else {
+                    callback();
+                }
+            });
+        },
+        _requireComponent: function(container, componentPath, componentAttributes, matchIndex, isSingle) {
+            return function (callback) {
+                F.require(componentPath, function (Component) {
+                    var component = new Component({ props: componentAttributes });
+                    var filler = container.getElementsByClassName('f-component-' + matchIndex)[0];
+                    component.render();
+                    if (!isSingle) {
+                        component.element.innerHTML = filler.innerHTML;
+                    }
+                    container.replaceChild(component.element, filler);
+                    callback(null);
+                });
             }
         },
-        _renderComponent: function(componentName, tpl) {
-
-        },
-        _requireComponent: function() {
-
-        },
-        render: function () {
+        render: function (callback) {
             var container, tpl, generatedTpl,
                 re, match, matchStr, matchIndex, matchAttributes, matchAttribute, matchSingle,
-                componentsHash, componentPath, componentAttributes, componentAttribute;
+                componentPath, componentAttributes, componentAttribute,
+                asyncHandles = [ ];
 
             container = document.createElement('div');
             tpl = this.options.tpl;
-            componentsHash = { };
 
             // Проверяем на компоненты
             re = /<f-([^>]+)\s*>/gi;
@@ -69,7 +79,7 @@ function (FormHandler, AHandler) {
                     componentAttributes.push(
                         {
                             name: F.trim(matchAttribute[0]),
-                            value: matchAttribute[1] ? F.trim(matchAttribute[1]) : ''
+                            value: F.trim(matchAttribute[1])
                         }
                     );
                 }
@@ -77,38 +87,26 @@ function (FormHandler, AHandler) {
                 console.log('component path: ', componentPath);
                 console.log('component attributes: ', componentAttributes);
 
-                if (F.isDefined(componentsHash[componentPath])) {
-                    componentsHash[componentPath].elements.push(
-                        {
-                            componentIndex: matchIndex,
-                            componentAttributes: componentAttributes
-                        }
-                    );
-                } else {
-                    componentsHash[componentPath] = {
-                        elements: [
-                            {
-                                componentIndex: matchIndex,
-                                componentAttributes: componentAttributes
-                            }
-                        ]
-                    };
-                }
+                asyncHandles.push(this._requireComponent(container, componentPath, componentAttributes, matchIndex, matchSingle));
 
                 generatedTpl = 
                     generatedTpl.substr(0, matchIndex) + 
-                        '<div id="f-component-' + matchIndex + '">' + 
+                        '<div class="f-component-' + matchIndex + '">' + 
                         (matchSingle ? '</div>' : '') +
                     generatedTpl.substr(matchIndex + match[0].length);
             }
 
             generatedTpl = generatedTpl.replace(/<\/\s*f-([^>]+)\s*>/gi, '</div>');
 
-            console.log('components hash: ', componentsHash);
-
             container.innerHTML = generatedTpl;
 
-            return container;
+            if (asyncHandles.length === 0) {
+                callback(container);
+            } else {
+                F.async(asyncHandles).promise.then(function () {
+                    callback(container);
+                });
+            }
         },
         stop: function () {
             if (previousModule) {
