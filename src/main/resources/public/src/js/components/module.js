@@ -34,10 +34,8 @@ function (FormHandler, AHandler) {
         _requireComponent: function(container, componentPath, componentAttributes, matchIndex, isSingle) {
             return function (callback) {
                 F.require(componentPath, function (Component) {
-                    var component = new Component({ props: componentAttributes });
+                    var component = new Component({ props: componentAttributes }).render();
                     var filler = container.getElementsByClassName('f-component-' + matchIndex)[0];
-
-                    component.render();
 
                     if (!isSingle) {
                         component.element.innerHTML = filler.innerHTML;
