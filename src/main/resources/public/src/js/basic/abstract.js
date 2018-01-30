@@ -8,17 +8,17 @@ function () {
     }
     AbstractBasic.prototype = {
         render: function () {
-            var container, element, options;
+            var container, options;
 
             options = this.options;
             container = document.createElement('div');
             container.innerHTML = options.tpl;
-            element = container.firstChild;
+            this.element = container.firstChild;
 
             // DOM-свойства элемента
             if (F.isDefined(options.props)) {
                 for (var i = 0, l = options.props.length; i < l; i++) {
-                    F.setAttr(element, options[i].name, options[i].value);
+                    F.setAttr(this.element, options.props[i].name, options.props[i].value);
                 }
             }
                 
@@ -27,7 +27,7 @@ function () {
             if (F.isDefined(options.handlers)) {
                 for (var i = 0, l = options.handlers.length; i < l; i++) {
                     this.handlers.push(
-                        new options.handlers[i](element)
+                        new options.handlers[i](this.element)
                     );
                 }
             }
