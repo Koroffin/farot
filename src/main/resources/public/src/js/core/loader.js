@@ -1,7 +1,8 @@
 (function (scope) {
     'use strict';
     var modules = { },
-        loaders = { };
+        loaders = { },
+        loaded  = { };
 
     // Загрузчик css (таск 3512338694)
     var sheet = (function() {
@@ -35,27 +36,42 @@
         }
     }
     function loadCss (name, callback, postfixes, context) {
-        var path = getLoadPath(name, postfixes, context, 'css');
-        F.send(path).then(function (res) {
-            var cssText = res.responseText;
-            var cssRules = cssText.split('}');
-            var cssRule;
-            console.log(cssRules);
-            for (var i = 0, l = cssRules.length; i < l; i++) {
-                cssRule = cssRules[i].split('{');
-                if (F.isDefined(cssRule[0]) && F.isDefined(cssRule[1])) {
-                    addCssRule(cssRule[0], cssRule[1]);
+        var path, loader;
+        path = getLoadPath(name, postfixes, context, 'css');
+
+        if (F.isDefined(loaded[path])) {
+            return callback(null);
+        }
+
+        if (F.isDefined(loaders[path])) {
+            loader = loaders[path];
+        } else {
+            loader = loaders[path] = F.send(path).then(function (res) {
+                var cssText = res.responseText;
+                var cssRules = cssText.split('}');
+                var cssRule;
+                for (var i = 0, l = cssRules.length; i < l; i++) {
+                    cssRule = cssRules[i].split('{');
+                    if (F.isDefined(cssRule[0]) && F.isDefined(cssRule[1])) {
+                        addCssRule(cssRule[0], cssRule[1]);
+                    }
                 }
-            }
+                loaded[path] = true;
+            }).catch(function () {
+                F.error('Could not load file ' + name + ' in context ' + context);
+            });
+        }
+
+        loader.then(function () {
             callback(null);
-        }).catch(function () {
-            F.error('Could not load file ' + name + ' in context ' + context);
         });
     }
 
     function getLoadPath (name, postfixes, context, folder) {
         // check for relative path
         if (name[0] === '.') {
+            var contextArr = context.split('/');
+            context = contextArr.slice(0, -1).join('/');
             return '/src/' + context + '/' + name.substr(2) + postfixes.pop();
         } else {
             return '/src/' + folder + '/' + name + postfixes.pop();
@@ -72,49 +88,76 @@
         if (F.isDefined(loaders[path])) {
             loader = loaders[path];
         } else {
-            loader = loaders[path] = F.send(path);
-        }
-        loader.then(function (res) {
-            var plain = res.responseText;
+            loader = loaders[path] = F.send(path).chain(function (res, next) {
+                var plain = res.responseText;
 
-            // check if define module
-            var define_match = /F\.define\(/.exec(plain);
-            if (define_match && (define_match.index === 0)) {
-                // add current path as context
-                var last_char_match = /\)[^\)]+$/.exec(plain);
-                eval(plain.substr(0, last_char_match.index) + ', "js/' + name + '");').then(function (result) {
-                    modules[path] = result;
-                    callback(result);
-                });
-            } else {
-                var s = document.createElement('script');
-                s.innerHTML = plain;
-                document.head.appendChild(s);
-                modules[path] = null;
-                callback(null);
-            }
-        }).catch(function () {
-            if (F.isEmpty(postfixes)) {
+                // check if define module
+                var define_match = /F\.define\(/.exec(plain);
+                if (define_match && (define_match.index === 0)) {
+                    // add current path as context
+                    var last_char_match = /\)[^\)]+$/.exec(plain);
+                    eval(plain.substr(0, last_char_match.index) + ', "js/' + name + '");').then(function (result) {
+                        modules[path] = result;
+                        next(result);
+                    });
+                } else {
+                    var s = document.createElement('script');
+                    s.innerHTML = plain;
+                    document.head.appendChild(s);
+                    modules[path] = null;
+                    next(null);
+                }
+            }).catch(function () {
                 F.error('Could not load file ' + name + ' in context ' + context);
-            } else {
-                loadJS(name, callback, postfixes, context);
-            }
+            });
+        }
+        loader.chain(function (result, next) {
+            callback(result);
+            next(result);
         });
     }
     function loadJson (name, callback, postfixes, context) {
-        var path = getLoadPath(name, postfixes, context, 'json');
-        F.send(path).then(function (res) {
-            callback(JSON.parse(res.responseText));
-        }).catch(function () {
-            F.error('Could not load file ' + name + ' in context ' + context);
+        var path, loader;
+        path = getLoadPath(name, postfixes, context, 'json');
+
+        if (F.isDefined(loaded[path])) {
+            return callback(loaded[path]);
+        }
+
+        if (F.isDefined(loaders[path])) {
+            loader = loaders[path];
+        } else {
+            loader = loaders[path] = F.send(path).then(function (res) {
+                loaded[path] = JSON.parse(res.responseText);
+            }).catch(function () {
+                F.error('Could not load file ' + name + ' in context ' + context);
+            });
+        }
+
+        loader.then(function (res) {
+            callback(loaded[path]);
         });
     }
     function loadPlain (name, callback, postfixes, context) {
-        var path = getLoadPath(name, postfixes, context, '');
-        F.send(path).then(function (res) {
-            callback(res.responseText);
-        }).catch(function () {
-            F.error('Could not load file ' + name + ' in context ' + context);
+        var path, loader
+        path = getLoadPath(name, postfixes, context, '');
+
+        if (F.isDefined(loaded[path])) {
+            return callback(loaded[path]);
+        }
+
+        if (F.isDefined(loaders[path])) {
+            loader = loaders[path];
+        } else {
+            loader = loaders[path] = F.send(path).then(function (res) {
+                loaded[path] = res.responseText;
+            }).catch(function () {
+                F.error('Could not load file ' + name + ' in context ' + context);
+            });
+        }
+
+        loader.then(function (res) {
+            callback(loaded[path]);
         });
     }
 
@@ -129,7 +172,7 @@
         } else if (loader === 'css') {
             loadCss(arr[1], callback, [ '.css' ], context)
         } else {
-            loadJS(name, callback, [ '/index.js', '.js' ], context);
+            loadJS(name, callback, [ '.js' ], context);
         }
     }
     function loadHandler (name, context) {

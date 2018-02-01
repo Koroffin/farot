@@ -39,10 +39,23 @@
         this.isExecuted = false;
         this.isExecutedError = false;
         this.callbacks = [];
+        this.chainCallbacks = [];
+        this.lastChainResult = undefined;
+        this.chainPointer = 0;
         this.errorbacks = [];
         this.result = undefined;
     }
     Promise.prototype = {
+        _iterateChain: function (result) {
+            var me = this;
+            this.lastChainResult = result;
+            if (F.isFunction(this.chainCallbacks[this.chainPointer])) {
+                this.chainCallbacks[this.chainPointer](result, function (result) {
+                    me.chainPointer++;
+                    me._iterateChain(result);
+                });
+            }
+        },
         then: function (fn) {
             if (this.isExecuted) {
                 fn(this.result);
@@ -59,12 +72,21 @@
             }
             return this;
         },
+        chain: function (fn) {
+            if (this.isExecuted && (this.chainPointer === this.chainCallbacks.length)) {
+                fn(this.lastChainResult);
+            } else {
+                this.chainCallbacks.push(fn);
+            }
+            return this;
+        },
         execute: function (result) {
             this.isExecuted = true;
             this.result = result;
             for (var i=0, l=this.callbacks.length; i<l; i++) {
                 this.callbacks[i](result);
             }
+            this._iterateChain(result);
         },
         executeError: function (result) {
             this.isExecutedError = true;
