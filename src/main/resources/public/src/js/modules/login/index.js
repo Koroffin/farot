@@ -3,6 +3,7 @@ F.define(
     'components/router',
     'plain!./templates/main.html',
     'core/trigger',
+    'css!./styles',
 function (Module, Router, tpl) {
     'use strict';
     var LoginModule,
