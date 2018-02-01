@@ -3,6 +3,56 @@
     var modules = { },
         loaders = { };
 
+    // Загрузчик css (таск 3512338694)
+    var sheet = (function() {
+        // Create the <style> tag
+        var style = document.createElement("style");
+
+        // Add a media (and/or media query) here if you'd like!
+        // style.setAttribute("media", "screen")
+        // style.setAttribute("media", "only screen and (max-width : 1024px)")
+
+        // WebKit hack :(
+        style.appendChild(document.createTextNode(""));
+
+        // Add the <style> element to the page
+        document.head.appendChild(style);
+
+        return style.sheet;
+    })();
+    var addCssRule;
+    if (F.isFunction(sheet.insertRule)) {
+        addCssRule = function (selector, rules, index) {
+            sheet.insertRule(selector + "{" + rules + "}", index);
+        }
+    } else if (F.isFunction(sheet.addRule)) {
+        addCssRule = function (selector, rules, index) {
+            sheet.addRule(selector, rules, index);
+        }
+    } else {
+        addCssRule = function () {
+            // TODO: рисовать заглушку "неподдерживаемый браузер"
+        }
+    }
+    function loadCss (name, callback, postfixes, context) {
+        var path = getLoadPath(name, postfixes, context, 'css');
+        F.send(path).then(function (res) {
+            var cssText = res.responseText;
+            var cssRules = cssText.split('}');
+            var cssRule;
+            console.log(cssRules);
+            for (var i = 0, l = cssRules.length; i < l; i++) {
+                cssRule = cssRules[i].split('{');
+                if (F.isDefined(cssRule[0]) && F.isDefined(cssRule[1])) {
+                    addCssRule(cssRule[0], cssRule[1]);
+                }
+            }
+            callback(null);
+        }).catch(function () {
+            F.error('Could not load file ' + name + ' in context ' + context);
+        });
+    }
+
     function getLoadPath (name, postfixes, context, folder) {
         // check for relative path
         if (name[0] === '.') {
@@ -76,6 +126,8 @@
             loadJson(arr[1], callback, [ '.json' ], context);
         } else if (loader === 'plain') {
             loadPlain(arr[1], callback, [ '' ], context);
+        } else if (loader === 'css') {
+            loadCss(arr[1], callback, [ '.css' ], context)
         } else {
             loadJS(name, callback, [ '/index.js', '.js' ], context);
         }

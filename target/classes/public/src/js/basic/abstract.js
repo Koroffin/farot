@@ -31,6 +31,9 @@ function () {
                     );
                 }
             }
+
+            // Возвращаем себя (таск 3514853476)
+            return this;
         },
         destroy: function () {
             for (var i = 0, l = this.handlers.length; i < l; i++) {
