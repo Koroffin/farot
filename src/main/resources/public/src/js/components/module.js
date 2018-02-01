@@ -33,7 +33,8 @@ function (FormHandler, AHandler) {
         },
         _requireComponent: function(container, componentPath, componentAttributes, matchIndex, isSingle) {
             return function (callback) {
-                F.require(componentPath, function (Component) {
+                F.require(componentPath + '/index', function (Component) {
+                    console.log('Component: ', Component);
                     var component = new Component({ props: componentAttributes }).render();
                     var filler = container.getElementsByClassName('f-component-' + matchIndex)[0];
 
