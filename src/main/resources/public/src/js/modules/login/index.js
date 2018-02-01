@@ -16,7 +16,7 @@ function (Module, Router, tpl) {
                 Router.navigate('game');
             });
             offSubmitLoginFormError = F.on('submit:LoginForm:error', function (res) {
-                console.log('here res error: ', res);
+                F.debug('here res error: ', res);
             });
             callback();
         },
