@@ -51,7 +51,7 @@ function (FormHandler, AHandler) {
         render: function (callback) {
             var container, tpl, generatedTpl,
                 re, match, matchStr, matchIndex, matchAttributes, matchAttribute, matchSingle,
-                componentPath, componentAttributes, componentAttribute,
+                componentPath, componentAttributes, componentAttributeValue,
                 asyncHandles = [ ];
 
             container = document.createElement('div');
@@ -79,10 +79,20 @@ function (FormHandler, AHandler) {
                 componentAttributes = [ ];
                 for (var i = 1, l = matchAttributes.length; i < l; i++) {
                     matchAttribute = matchAttributes[i].split('=');
+                    componentAttributeValue = F.trim(matchAttribute[1]);
+
+                    if (componentAttributeValue[0] === '"') {
+                        // just a string
+                        componentAttributeValue = componentAttributeValue.slice(1, -1);
+                    } else if (componentAttributeValue[0] === '{') {
+                        // state variable, need eval
+                        componentAttributeValue = F.eval(componentAttributeValue.slice(1, -1), this.options);
+                    }
+
                     componentAttributes.push(
                         {
                             name: F.trim(matchAttribute[0]),
-                            value: F.trim(matchAttribute[1])
+                            value: componentAttributeValue
                         }
                     );
                 }
