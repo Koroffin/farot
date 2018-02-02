@@ -113,6 +113,11 @@
             _console.error(msg);
         }
     }
+    function debug () {
+        if (isObject(_console) && isFunction(console.log)) {
+            console.log.apply(this, arguments);
+        }
+    }
 
     /*
         array and object methods
@@ -281,6 +286,7 @@
     F.nope = nope;
 
     F.error = error;
+    F.debug = debug;
 
     F.last       = last;
     F.clone      = clone;

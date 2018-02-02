@@ -114,8 +114,8 @@
         }
     }
     function debug () {
-        if (isObject(_console) && isFunction(_F.debug)) {
-            _F.debug(arguments);
+        if (isObject(_console) && isFunction(console.log)) {
+            console.log.apply(this, arguments);
         }
     }
 
