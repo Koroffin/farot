@@ -34,7 +34,6 @@ function (FormHandler, AHandler) {
         _requireComponent: function(container, componentPath, componentAttributes, matchIndex, isSingle) {
             return function (callback) {
                 F.require(componentPath + '/index', function (Component) {
-                    F.debug('Component: ', Component);
                     var component = new Component({ props: componentAttributes }).render();
                     var filler = container.getElementsByClassName('f-component-' + matchIndex)[0];
 
@@ -70,10 +69,6 @@ function (FormHandler, AHandler) {
                 }
 
                 matchAttributes = matchStr.split(' ');
-
-                F.debug('match custom component: ', matchStr, matchIndex);
-                F.debug('test index: ', tpl[matchIndex] + tpl[matchIndex + 1] + tpl[matchIndex + 2]);
-                F.debug('array is: ', matchAttributes);
 
                 componentPath = 'basic/' + matchAttributes[0].replace(/\-/gi, '/');
                 componentAttributes = [ ];

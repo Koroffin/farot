@@ -7,7 +7,9 @@
         '-': 2,
         '*': 3,
         '/': 3,
-        '%': 4
+        '%': 4,
+        '||': 5,
+        '&&': 6
     };
     
     function Word () {
@@ -39,6 +41,9 @@
         DIVIDE: '/',
         BRACKET_OPEN: '(',
         BRACKET_CLOSE: ')',
+        VERTICAL_LINE: '|',
+        AND_SYMBOL: '&',
+        EXCLAMATION_MARK: '!',
 
         _addSymbol: function (symbol) {
             this.readedSubstr += symbol;
@@ -51,14 +56,6 @@
                 var isChar = /[a-z]/i.test(symbol);
                 var isNumber = /[0-9]/i.test(symbol);
                 var isWhiteSpace = /\s/.test(symbol);
-
-                // Catching typical errors
-                if (isChar && !this.canAddChar()) {
-                    throw new Error('Can not add char ' + symbol + ' to word ' + this.readedSubstr);
-                }
-                if (isNumber && !this.canAddNumber()) {
-                    throw new Error('Can not add number ' + symbol + ' to word ' + this.readedSubstr);
-                }
 
                 // Checking other symbols
                 if (this.isString()) {
@@ -91,7 +88,6 @@
                     } else if (this.isOperandSymbol(symbol)) {
                         this.setType(this.OPERAND_TYPE)
                             ._addSymbol(symbol);
-                        res = this.END_STATUS;
                     } else {
                         throw new Error('Can not start a word with ' + symbol);
                     }
@@ -103,6 +99,15 @@
                     this.setType(this.FLOAT_TYPE)
                         ._addSymbol(symbol);
                 } else if (this.isOperandSymbol(symbol)) {
+                    if (this.isOperand() && this.canAddToOperand(symbol)) {
+                        console.log('add at ', symbol, this.readedSubstr);
+                        this._addSymbol(symbol);
+                    } else {
+                        console.log('stop at ', symbol, this.readedSubstr);
+                        res = this.END_STATUS;
+                    }                    
+                } else if (this.isOperand()) {
+                    console.log('stop at ', symbol, this.readedSubstr);
                     res = this.END_STATUS;
                 } else {
                     throw new Error('Can not add symbol ' + symbol + ' to word ' + this.readedSubstr);
@@ -156,12 +161,33 @@
                     return b % a;
                 };
             }
+            if (this.isLogicalNot()) {
+                return function (a) {
+                    return !a;
+                };
+            }
+            if (this.isLogicalAnd()) {
+                return function (a, b) {
+                    return b && a;
+                };
+            }
+            if (this.isLogicalOr()) {
+                return function (a, b) {
+                    return b || a;
+                };
+            }
         },
         getOperand: function () {
             return this.readedSubstr;
         },
         getOperandPriority: function () {
             return operandPriority[this.readedSubstr];
+        },
+        getOperandArgumentsLength: function () {
+            if (this.isLogicalNot()) {
+                return 1;
+            }
+            return 2;
         },
 
         setType: function (type) {
@@ -194,7 +220,18 @@
                 (symbol === this.MULTIPLE) ||
                 (symbol === this.BRACKET_OPEN) ||
                 (symbol === this.BRACKET_CLOSE) ||
-                (symbol === this.PERCENT)
+                (symbol === this.PERCENT) ||
+                (symbol === this.VERTICAL_LINE) ||
+                (symbol === this.AND_SYMBOL) ||
+                (symbol === this.EXCLAMATION_MARK)
+            );
+        },
+        canAddToOperand: function (symbol) {
+            return (
+                // for logical "and"
+                ((this.readedSubstr === this.AND_SYMBOL) && (symbol === this.AND_SYMBOL)) ||
+                // for logical "or"
+                ((this.readedSubstr === this.VERTICAL_LINE) && (symbol === this.VERTICAL_LINE))
             );
         },
 
@@ -237,9 +274,37 @@
         },
         isMod: function () {
             return this.readedSubstr === this.PERCENT;
+        },
+        isLogicalAnd: function () {
+            return this.readedSubstr === (this.AND_SYMBOL + this.AND_SYMBOL);
+        },
+        isLogicalOr: function () {
+            return this.readedSubstr === (this.VERTICAL_LINE + this.VERTICAL_LINE);
+        },
+        isLogicalNot: function () {
+            return this.readedSubstr === this.EXCLAMATION_MARK;
         }
     };
 
+    function _evalStack (stack, parent) {
+        var res, value, element,
+            argumentsArray, argumentsCount;
+        res = [ ];
+        for (var i = 0, l = stack.length; i < l; i++) {
+            element = stack[i];
+            value = element.getValue(parent);
+            if (element.isOperand()) {
+                argumentsCount = element.getOperandArgumentsLength();
+                argumentsArray = [ ];
+                for (var j = 0; j < argumentsCount; j++) {
+                    argumentsArray.push(res.pop());
+                }
+                value = value.apply(this, argumentsArray);
+            }
+            res.push(value);
+        }
+        return res[0];
+    }
     function _eval (str, parent) {
         var words, pointer, currentWord, res, 
             outputArray, operandsStack, operand;
@@ -263,6 +328,7 @@
                     pointer++
                 }
                 if (currentWord.isOperand()) {
+                    console.log('operand found: ', currentWord.readedSubstr);
                     // parse as operand
                     if (currentWord.isCloseBracket()) {
                         // pop untill '('
@@ -280,7 +346,6 @@
                         }
                         operandsStack.push(currentWord);
                     }
-                    pointer++;
                 } else {
                     outputArray.push(currentWord);
                 }
@@ -290,7 +355,25 @@
             }            
         }
 
-        if (!currentWord.isUndefined()) {
+        if (currentWord.isOperand()) {
+            // parse as operand
+            if (currentWord.isCloseBracket()) {
+                // pop untill '('
+                operand = operandsStack.pop();
+                while (!operand.isOpenBracket()) {
+                    outputArray.push(operand);
+                    operand = operandsStack.pop();
+                }
+            } else if (currentWord.isOpenBracket()) {
+                operandsStack.push(currentWord);
+            } else {
+                // pop untill priority will be lower
+                while (!F.isEmpty(operandsStack) && F.last(operandsStack).getOperandPriority() >= currentWord.getOperandPriority()) {
+                    outputArray.push(operandsStack.pop());
+                }
+                operandsStack.push(currentWord);
+            }
+        } else if (!currentWord.isUndefined()) {
             outputArray.push(currentWord);
         }        
 
@@ -302,19 +385,6 @@
         F.debug('here is output: ', outputArray)
 
         return _evalStack(outputArray, parent);
-    }
-    function _evalStack (stack, parent) {
-        var res, value, element;
-        res = [ ];
-        for (var i = 0, l = stack.length; i < l; i++) {
-            element = stack[i];
-            value = element.getValue(parent);
-            if (element.isOperand()) {
-                value = value(res.pop(), res.pop());
-            }
-            res.push(value);
-        }
-        return res[0];
     }
 
     context.eval = _eval;
