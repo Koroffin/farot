@@ -24,6 +24,7 @@
         STRING_TYPE: 'string',
         FLOAT_TYPE: 'float',
         OPERAND_TYPE: 'operand',
+        FUNCTION_TYPE: 'function',
 
         ERROR_STATUS: 'error',
         OK_STATUS: 'ok',
@@ -33,6 +34,7 @@
         STRING_MATCH_DOUBLE: '"',
 
         DOT: '.',
+        COMMA: ',',
 
         PLUS: '+',
         MINUS: '-',
@@ -62,19 +64,21 @@
                 var isNumber = /[0-9]/i.test(symbol);
                 var isWhiteSpace = /\s/.test(symbol);
 
-                // Checking other symbols
                 if (this.isString()) {
                     if (this.isStringMatch(symbol) && (this.stringStartedSymbol === symbol)) {
                         res = this.END_STATUS;
                     } else {
                         this._addSymbol(symbol);
                     }                    
-                } else if (isWhiteSpace) {
-                    if (this.isUndefined()) {
-                        // ignore it
-                    } else {
+                } else if (this.isFunction()) {
+                    // need to parse function arguments
+                    if (this.isCloseBracketSymbol(symbol)) {
                         res = this.END_STATUS;
-                    }                    
+                    } else if (this.isComma(symbol)) {
+                        this.functionArguments.push(new Word());
+                    } else {
+                        res = F.last(this.functionArguments).addSymbol(symbol);
+                    }
                 } else if (this.isUndefined()) {
                     // need initialize type
                     if (isNumber) {
@@ -93,26 +97,32 @@
                     } else if (this.isOperandSymbol(symbol)) {
                         this.setType(this.OPERAND_TYPE)
                             ._addSymbol(symbol);
+                    } else if (isWhiteSpace) {
+                        // ignore it
                     } else {
                         throw new Error('Can not start a word with ' + symbol);
                     }
+                } else if (isWhiteSpace) {
+                    res = this.END_STATUS;
+                } else if (this.isVariable() && this.isOpenBracketSymbol(symbol)) {
+                    // it's a function, not variable
+                    this.setType(this.FUNCTION_TYPE);
+                    this.functionArguments = [ new Word() ];
                 } else if (isChar && this.canAddChar()) {
                     this._addSymbol(symbol);
                 } else if (isNumber && this.canAddNumber()) {
                     this._addSymbol(symbol);
                 } else if (this.isDot(symbol) && this.isNumber()) {
+                    // it's a float, not number
                     this.setType(this.FLOAT_TYPE)
                         ._addSymbol(symbol);
                 } else if (this.isOperandSymbol(symbol)) {
                     if (this.isOperand() && this.canAddToOperand(symbol)) {
-                        console.log('add at ', symbol, this.readedSubstr);
                         this._addSymbol(symbol);
                     } else {
-                        console.log('stop at ', symbol, this.readedSubstr);
                         res = this.END_STATUS;
                     }                    
                 } else if (this.isOperand()) {
-                    console.log('stop at ', symbol, this.readedSubstr);
                     res = this.END_STATUS;
                 } else {
                     throw new Error('Can not add symbol ' + symbol + ' to word ' + this.readedSubstr);
@@ -185,6 +195,13 @@
                     return b || a;
                 };
             }
+            if (this.isFunction()) {
+                var functionArgumentsResults = [ ];
+                for (var i = 0, l = this.functionArguments.length; i < l; i++) {
+                    functionArgumentsResults.push(this.functionArguments[i].getValue(parent));
+                }
+                return parent[this.readedSubstr].apply(this, functionArgumentsResults);
+            }
         },
         getOperand: function () {
             return this.readedSubstr;
@@ -219,7 +236,16 @@
             return (symbol === this.STRING_MATCH) || (symbol === this.STRING_MATCH_DOUBLE);
         },
         isDot: function (symbol) {
-            return (symbol === this.DOT);
+            return symbol === this.DOT;
+        },
+        isComma: function (symbol) {
+            return symbol === this.COMMA;
+        },
+        isOpenBracketSymbol: function (symbol) {
+            return symbol === this.BRACKET_OPEN;
+        },
+        isCloseBracketSymbol: function (symbol) {
+            return symbol === this.BRACKET_CLOSE;
         },
         isOperandSymbol: function (symbol) {
             return (
@@ -261,6 +287,9 @@
         },
         isOperand: function () {
             return this.type === this.OPERAND_TYPE;
+        },
+        isFunction: function () {
+            return this.type === this.FUNCTION_TYPE;
         },
 
         isOpenBracket: function () {
@@ -332,12 +361,11 @@
                 break;
             }
             if (res === Word.prototype.END_STATUS) {
-                if (currentWord.isString()) {
+                if (currentWord.isString() || currentWord.isFunction()) {
                     // need to increase pointer
                     pointer++
                 }
                 if (currentWord.isOperand()) {
-                    console.log('operand found: ', currentWord.readedSubstr);
                     // parse as operand
                     if (currentWord.isCloseBracket()) {
                         // pop untill '('
