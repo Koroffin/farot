@@ -45,6 +45,11 @@
         AND_SYMBOL: '&',
         EXCLAMATION_MARK: '!',
 
+        predefinedVariables: {
+            'true': true,
+            'false': false
+        },
+
         _addSymbol: function (symbol) {
             this.readedSubstr += symbol;
             return this;
@@ -131,7 +136,11 @@
                 return parseInt(this.readedSubstr, 10);
             }
             if (this.isVariable()) {
-                return parent[this.readedSubstr];
+                if (F.isDefined(this.predefinedVariables[this.readedSubstr])) {
+                    return this.predefinedVariables[this.readedSubstr];
+                } else {
+                    return parent[this.readedSubstr];
+                }                
             }
             if (this.isFloat()) {
                 return parseFloat(this.readedSubstr, 10);
