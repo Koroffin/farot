@@ -3,13 +3,19 @@
 
     var operandPriority = {
         '(': 1,
-        '+': 2,
-        '-': 2,
-        '*': 3,
-        '/': 3,
-        '%': 4,
-        '||': 5,
-        '&&': 6
+        '==': 2,
+        '===': 2,
+        '>': 2,
+        '>=': 2,
+        '<=': 2,
+        '<': 2,
+        '+': 3,
+        '-': 3,
+        '*': 4,
+        '/': 4,
+        '%': 5,
+        '||': 6,
+        '&&': 7
     };
     
     function Word () {
@@ -46,6 +52,9 @@
         VERTICAL_LINE: '|',
         AND_SYMBOL: '&',
         EXCLAMATION_MARK: '!',
+        MORE_SIGN: '>',
+        LESS_SIGN: '<',
+        EQUAL_SIGN: '=',
 
         predefinedVariables: {
             'true': true,
@@ -194,6 +203,36 @@
                     return b || a;
                 };
             }
+            if (this.isEqual()) {
+                return function (a, b) {
+                    return b == a;
+                };
+            }
+            if (this.isStrictEqual()) {
+                return function (a, b) {
+                    return b === a;
+                };
+            }
+            if (this.isMore()) {
+                return function (a, b) {
+                    return b > a;
+                };
+            }
+            if (this.isMoreOrEqual()) {
+                return function (a, b) {
+                    return b >= a;
+                };
+            }
+            if (this.isLess()) {
+                return function (a, b) {
+                    return b < a;
+                };
+            }
+            if (this.isLessOrEqual()) {
+                return function (a, b) {
+                    return b <= a;
+                };
+            }
             if (this.isFunction()) {
                 return parent[this.readedSubstr];
             }
@@ -256,7 +295,10 @@
                 (symbol === this.PERCENT) ||
                 (symbol === this.VERTICAL_LINE) ||
                 (symbol === this.AND_SYMBOL) ||
-                (symbol === this.EXCLAMATION_MARK)
+                (symbol === this.EXCLAMATION_MARK) ||
+                (symbol === this.MORE_SIGN) ||
+                (symbol === this.LESS_SIGN) ||
+                (symbol === this.EQUAL_SIGN)
             );
         },
         canAddToOperand: function (symbol) {
@@ -264,7 +306,15 @@
                 // for logical "and"
                 ((this.readedSubstr === this.AND_SYMBOL) && (symbol === this.AND_SYMBOL)) ||
                 // for logical "or"
-                ((this.readedSubstr === this.VERTICAL_LINE) && (symbol === this.VERTICAL_LINE))
+                ((this.readedSubstr === this.VERTICAL_LINE) && (symbol === this.VERTICAL_LINE)) ||
+                // for "=="
+                ((this.readedSubstr === this.EQUAL_SIGN) && (symbol === this.EQUAL_SIGN)) ||
+                // for "==="
+                ((this.readedSubstr === (this.EQUAL_SIGN + this.EQUAL_SIGN)) && (symbol === this.EQUAL_SIGN)) ||
+                // for "<="
+                ((this.readedSubstr === this.LESS_SIGN) && (symbol === this.EQUAL_SIGN)) ||
+                // for ">="
+                ((this.readedSubstr === this.MORE_SIGN) && (symbol === this.EQUAL_SIGN))
             );
         },
 
@@ -322,6 +372,24 @@
         },
         isComma: function () {
             return this.readedSubstr === this.COMMA;
+        },
+        isMore: function () {
+            return this.readedSubstr === this.MORE_SIGN;
+        },
+        isMoreOrEqual: function () {
+            return this.readedSubstr === (this.MORE_SIGN + this.EQUAL_SIGN);
+        },
+        isLess: function () {
+            return this.readedSubstr === this.LESS_SIGN;
+        },
+        isLessOrEqual: function () {
+            return this.readedSubstr === (this.LESS_SIGN + this.EQUAL_SIGN);
+        },
+        isEqual: function () {
+            return this.readedSubstr === (this.EQUAL_SIGN + this.EQUAL_SIGN);
+        },
+        isStrictEqual: function () {
+            return this.readedSubstr === (this.EQUAL_SIGN + this.EQUAL_SIGN + this.EQUAL_SIGN);
         }
     };
 
@@ -367,7 +435,7 @@
                     // need to increase pointer
                     pointer++
                 } 
-                else if (currentWord.isOperand()) {
+                if (currentWord.isOperand()) {
                     // parse as operand
                     if (currentWord.isCloseBracket()) {
                         // pop untill '('
