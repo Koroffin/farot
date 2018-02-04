@@ -49,7 +49,9 @@
 
         predefinedVariables: {
             'true': true,
-            'false': false
+            'false': false,
+            'undefined': undefined,
+            'Infinity': Infinity
         },
 
         _addSymbol: function (symbol) {
@@ -70,15 +72,6 @@
                     } else {
                         this._addSymbol(symbol);
                     }                    
-                } else if (this.isFunction()) {
-                    // need to parse function arguments
-                    if (this.isCloseBracketSymbol(symbol)) {
-                        res = this.END_STATUS;
-                    } else if (this.isComma(symbol)) {
-                        this.functionArguments.push(new Word());
-                    } else {
-                        res = F.last(this.functionArguments).addSymbol(symbol);
-                    }
                 } else if (this.isUndefined()) {
                     // need initialize type
                     if (isNumber) {
@@ -99,6 +92,9 @@
                             ._addSymbol(symbol);
                     } else if (isWhiteSpace) {
                         // ignore it
+                    } else if (this.isCommaSymbol(symbol)) {
+                        this._addSymbol(symbol);
+                        res = this.END_STATUS;
                     } else {
                         throw new Error('Can not start a word with ' + symbol);
                     }
@@ -107,8 +103,11 @@
                 } else if (this.isVariable() && this.isOpenBracketSymbol(symbol)) {
                     // it's a function, not variable
                     this.setType(this.FUNCTION_TYPE);
-                    this.functionArguments = [ new Word() ];
-                } else if (isChar && this.canAddChar()) {
+                    this.argumentsCount = 0;
+                    res = this.END_STATUS;
+                } else if (this.isVariable() && this.isCommaSymbol(symbol)) {
+                    res = this.END_STATUS;
+                } else if (isChar && this.canAddChar()) {  
                     this._addSymbol(symbol);
                 } else if (isNumber && this.canAddNumber()) {
                     this._addSymbol(symbol);
@@ -196,20 +195,19 @@
                 };
             }
             if (this.isFunction()) {
-                var functionArgumentsResults = [ ];
-                for (var i = 0, l = this.functionArguments.length; i < l; i++) {
-                    functionArgumentsResults.push(this.functionArguments[i].getValue(parent));
-                }
-                return parent[this.readedSubstr].apply(this, functionArgumentsResults);
+                return parent[this.readedSubstr];
             }
         },
         getOperand: function () {
             return this.readedSubstr;
         },
         getOperandPriority: function () {
-            return operandPriority[this.readedSubstr];
+            return F.isDefined(operandPriority[this.readedSubstr]) ? operandPriority[this.readedSubstr] : Infinity;
         },
         getOperandArgumentsLength: function () {
+            if (F.isDefined(this.argumentsCount)) {
+                return this.argumentsCount;
+            }
             if (this.isLogicalNot()) {
                 return 1;
             }
@@ -238,7 +236,7 @@
         isDot: function (symbol) {
             return symbol === this.DOT;
         },
-        isComma: function (symbol) {
+        isCommaSymbol: function (symbol) {
             return symbol === this.COMMA;
         },
         isOpenBracketSymbol: function (symbol) {
@@ -321,6 +319,9 @@
         },
         isLogicalNot: function () {
             return this.readedSubstr === this.EXCLAMATION_MARK;
+        },
+        isComma: function () {
+            return this.readedSubstr === this.COMMA;
         }
     };
 
@@ -331,7 +332,7 @@
         for (var i = 0, l = stack.length; i < l; i++) {
             element = stack[i];
             value = element.getValue(parent);
-            if (element.isOperand()) {
+            if (element.isOperand() || element.isFunction()) {
                 argumentsCount = element.getOperandArgumentsLength();
                 argumentsArray = [ ];
                 for (var j = 0; j < argumentsCount; j++) {
@@ -345,7 +346,8 @@
     }
     function _eval (str, parent) {
         var words, pointer, currentWord, res, 
-            outputArray, operandsStack, operand;
+            outputArray, operandsStack, operand, poppedOperand,
+            currentFunction;
 
         words = [ ];
         pointer = 0;
@@ -361,11 +363,11 @@
                 break;
             }
             if (res === Word.prototype.END_STATUS) {
-                if (currentWord.isString() || currentWord.isFunction()) {
+                if (currentWord.isString() || currentWord.isComma()) {
                     // need to increase pointer
                     pointer++
-                }
-                if (currentWord.isOperand()) {
+                } 
+                else if (currentWord.isOperand()) {
                     // parse as operand
                     if (currentWord.isCloseBracket()) {
                         // pop untill '('
@@ -379,11 +381,27 @@
                     } else {
                         // pop untill priority will be lower
                         while (!F.isEmpty(operandsStack) && F.last(operandsStack).getOperandPriority() >= currentWord.getOperandPriority()) {
-                            outputArray.push(operandsStack.pop());
+                            poppedOperand = operandsStack.pop();
+                            if (poppedOperand.isFunction()) {
+                                currentFunction = currentFunction.previousFunction;
+                            }
+                            outputArray.push(poppedOperand);
                         }
                         operandsStack.push(currentWord);
                     }
+                } else if (currentWord.isFunction()) {
+                    operandsStack.push(currentWord);
+                    if (F.isDefined(currentFunction)) {
+                        currentFunction.function.argumentsCount++;
+                    }
+                    currentFunction = {
+                        function: currentWord,
+                        previousFunction: currentFunction
+                    };
                 } else {
+                    if (F.isDefined(currentFunction)) {
+                        currentFunction.function.argumentsCount++;
+                    }
                     outputArray.push(currentWord);
                 }
                 currentWord = new Word();
