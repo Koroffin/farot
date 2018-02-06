@@ -3,19 +3,21 @@
 
     var operandPriority = {
         '(': 1,
-        '==': 2,
-        '===': 2,
-        '>': 2,
-        '>=': 2,
-        '<=': 2,
-        '<': 2,
-        '+': 3,
-        '-': 3,
-        '*': 4,
-        '/': 4,
-        '%': 5,
-        '||': 6,
-        '&&': 7
+        '?': 2,
+        '==': 3,
+        '===': 3,
+        '>': 3,
+        '>=': 3,
+        '<=': 3,
+        '<': 3,
+        '+': 4,
+        '-': 4,
+        '*': 5,
+        '/': 5,
+        '%': 6,
+        '||': 7,
+        '&&': 8,
+        ':': 9,
     };
     
     function Word () {
@@ -31,6 +33,7 @@
         FLOAT_TYPE: 'float',
         OPERAND_TYPE: 'operand',
         FUNCTION_TYPE: 'function',
+        CONDITION_TYPE: 'condition',
 
         ERROR_STATUS: 'error',
         OK_STATUS: 'ok',
@@ -55,6 +58,8 @@
         MORE_SIGN: '>',
         LESS_SIGN: '<',
         EQUAL_SIGN: '=',
+        COLON: ':',
+        QUESTION_MARK: '?',
 
         predefinedVariables: {
             'true': true,
@@ -236,6 +241,11 @@
             if (this.isFunction()) {
                 return parent[this.readedSubstr];
             }
+            if (this.isCondition()) {
+                return function (a, b, c) {
+                    return c ? b : a;
+                }
+            }
         },
         getOperand: function () {
             return this.readedSubstr;
@@ -249,6 +259,9 @@
             }
             if (this.isLogicalNot()) {
                 return 1;
+            }
+            if (this.isCondition()) {
+                return 3;
             }
             return 2;
         },
@@ -298,7 +311,9 @@
                 (symbol === this.EXCLAMATION_MARK) ||
                 (symbol === this.MORE_SIGN) ||
                 (symbol === this.LESS_SIGN) ||
-                (symbol === this.EQUAL_SIGN)
+                (symbol === this.EQUAL_SIGN) ||
+                (symbol === this.COLON) ||
+                (symbol === this.QUESTION_MARK)
             );
         },
         canAddToOperand: function (symbol) {
@@ -338,6 +353,9 @@
         },
         isFunction: function () {
             return this.type === this.FUNCTION_TYPE;
+        },
+        isCondition: function () {
+            return this.type === this.CONDITION_TYPE;
         },
 
         isOpenBracket: function () {
@@ -390,6 +408,12 @@
         },
         isStrictEqual: function () {
             return this.readedSubstr === (this.EQUAL_SIGN + this.EQUAL_SIGN + this.EQUAL_SIGN);
+        },
+        isColon: function () {
+            return this.readedSubstr === this.COLON;
+        },
+        isQuestionMark: function () {
+            return this.readedSubstr === this.QUESTION_MARK;
         }
     };
 
@@ -400,7 +424,7 @@
         for (var i = 0, l = stack.length; i < l; i++) {
             element = stack[i];
             value = element.getValue(parent);
-            if (element.isOperand() || element.isFunction()) {
+            if (element.isOperand() || element.isFunction() || element.isCondition()) {
                 argumentsCount = element.getOperandArgumentsLength();
                 argumentsArray = [ ];
                 for (var j = 0; j < argumentsCount; j++) {
@@ -437,7 +461,16 @@
                 } 
                 if (currentWord.isOperand()) {
                     // parse as operand
-                    if (currentWord.isCloseBracket()) {
+                    if (currentWord.isColon()) {
+                        // pop untill '?'
+                        operand = operandsStack.pop(); 
+                        while (!operand.isQuestionMark()) {
+                            outputArray.push(operand);
+                            operand = operandsStack.pop();
+                        }
+                        currentWord.setType(Word.prototype.CONDITION_TYPE);
+                        operandsStack.push(currentWord);
+                    } else if (currentWord.isCloseBracket()) {
                         // pop untill '('
                         operand = operandsStack.pop();
                         while (!operand.isOpenBracket()) {
@@ -505,7 +538,7 @@
             outputArray.push(operand);
         }
 
-        F.debug('here is output: ', outputArray)
+        F.debug('here is output: ', outputArray);
 
         return _evalStack(outputArray, parent);
     }
