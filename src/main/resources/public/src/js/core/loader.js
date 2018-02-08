@@ -211,7 +211,7 @@
 
         try {
             if (!F.isFunction(callback)) {
-                throw new Error('Define callback should be a function');
+                throw new Error('Define callback should be a function, but got ' + callback);
             }
 
             args.push(function () {

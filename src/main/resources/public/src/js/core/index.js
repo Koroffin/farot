@@ -250,7 +250,9 @@
 
             try {
                 var json = JSON.parse(req.responseText);
-                if (json.success) {
+                if (F.isUndefined(json.success)) {
+                    p.execute(json);
+                } else if (json.success) {
                     p.execute(json.data);
                 } else {
                     p.executeError(json.data);
