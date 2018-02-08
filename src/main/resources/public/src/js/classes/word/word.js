@@ -1,6 +1,7 @@
 F.define(
     'json!./operandPriority',
-function (operandPriority) {
+    './helpers',
+function (operandPriority, helpers) {
     'use strict';
 
     function Word () {
@@ -180,96 +181,66 @@ function (operandPriority) {
             if (this.isString()) {
                 return this.readedSubstr;
             }
+
             if (this.isNumber()) {
                 return parseInt(this.readedSubstr, 10);
             }
-            if (this.isVariable()) {
+            if (this.isFloat()) {
+                return parseFloat(this.readedSubstr, 10);
+            }
+
+            if (this.isVariable() || this.isFunction()) {
                 if (F.isDefined(this.predefinedVariables[this.readedSubstr])) {
                     return this.predefinedVariables[this.readedSubstr];
                 } else {
                     return parent[this.readedSubstr];
                 }                
             }
-            if (this.isFloat()) {
-                return parseFloat(this.readedSubstr, 10);
-            }
+            
             if (this.isPlus()) {
-                return function (a, b) {
-                    return b + a;
-                };
+                return helpers.plus;
             }
             if (this.isMinus()) {
-                return function (a, b) {
-                    return b - a;
-                };
+                return helpers.minus;
             }
             if (this.isDivide()) {
-                return function (a, b) {
-                    return b / a;
-                };
+                return helpers.divide;
             }
             if (this.isMultiple()) {
-                return function (a, b) {
-                    return b * a;
-                };
+                return helpers.multi;
             }
             if (this.isMod()) {
-                return function (a, b) {
-                    return b % a;
-                };
+                return helpers.mod;
             }
             if (this.isLogicalNot()) {
-                return function (a) {
-                    return !a;
-                };
+                return helpers.logicalNot;
             }
             if (this.isLogicalAnd()) {
-                return function (a, b) {
-                    return b && a;
-                };
+                return helpers.logicalAnd;
             }
             if (this.isLogicalOr()) {
-                return function (a, b) {
-                    return b || a;
-                };
+                return helpers.logicalOr;
             }
             if (this.isEqual()) {
-                return function (a, b) {
-                    return b == a;
-                };
+                return helpers.equal;
             }
             if (this.isStrictEqual()) {
-                return function (a, b) {
-                    return b === a;
-                };
+                return helpers.strictEqual;
             }
             if (this.isMore()) {
-                return function (a, b) {
-                    return b > a;
-                };
+                return helpers.more;
             }
             if (this.isMoreOrEqual()) {
-                return function (a, b) {
-                    return b >= a;
-                };
+                return helpers.moreOrEqual;
             }
             if (this.isLess()) {
-                return function (a, b) {
-                    return b < a;
-                };
+                return helpers.less;
             }
             if (this.isLessOrEqual()) {
-                return function (a, b) {
-                    return b <= a;
-                };
-            }
-            if (this.isFunction()) {
-                return parent[this.readedSubstr];
+                return helpers.lessOrEqual;
             }
             if (this.isCondition()) {
-                return function (a, b, c) {
-                    return c ? b : a;
-                }
+                return helpers.condition;
             }
         },
         getOperand: function () {
