@@ -82,11 +82,6 @@ function (operandPriority, helpers) {
                     .setType(this.STRING_TYPE)
                         .stringStartedSymbol = symbol;
                 return this.ok();
-            } else if (this.isDot(symbol)) {
-                return this.setType(this.FLOAT_TYPE)
-                    ._addSymbol('0')
-                    ._addSymbol(symbol)
-                    .ok();
             } else if (this.isOperandSymbol(symbol)) {
                 return this
                     .setType(this.OPERAND_TYPE)
@@ -97,6 +92,11 @@ function (operandPriority, helpers) {
                 return this.ok();
             } else if (this.isCommaSymbol(symbol)) {
                 return this
+                    ._addSymbol(symbol)
+                    .end();
+            } else if (this.isDotSymbol(symbol)) {
+                return this
+                    .setType(this.OPERAND_TYPE)
                     ._addSymbol(symbol)
                     .end();
             } else {
@@ -150,11 +150,15 @@ function (operandPriority, helpers) {
                     .ok();
             }
 
-            if (this.isDot(symbol) && this.isNumber()) {
-                // it's a float, not number
-                return this.setType(this.FLOAT_TYPE)
-                    ._addSymbol(symbol)
-                    .ok();
+            if (this.isDotSymbol(symbol)) {
+                if (this.isNumber()) {
+                    // it's a float, not number
+                    return this.setType(this.FLOAT_TYPE)
+                        ._addSymbol(symbol)
+                        .ok();
+                } else if (this.isString() || this.isVariable()) {
+                    return this.end();
+                }
             }
 
             if (this.isOperandSymbol(symbol)) {
@@ -196,7 +200,7 @@ function (operandPriority, helpers) {
                     return parent[this.readedSubstr];
                 }                
             }
-            
+
             if (this.isPlus()) {
                 return helpers.plus;
             }
@@ -242,6 +246,9 @@ function (operandPriority, helpers) {
             if (this.isCondition()) {
                 return helpers.condition;
             }
+            if (this.isDot()) {
+                return helpers.dot;
+            }
         },
         getOperand: function () {
             return this.readedSubstr;
@@ -281,7 +288,7 @@ function (operandPriority, helpers) {
         isStringMatch: function (symbol) {
             return (symbol === this.STRING_MATCH) || (symbol === this.STRING_MATCH_DOUBLE);
         },
-        isDot: function (symbol) {
+        isDotSymbol: function (symbol) {
             return symbol === this.DOT;
         },
         isCommaSymbol: function (symbol) {
@@ -410,6 +417,9 @@ function (operandPriority, helpers) {
         },
         isQuestionMark: function () {
             return this.readedSubstr === this.QUESTION_MARK;
+        },
+        isDot: function () {
+            return this.readedSubstr === this.DOT;
         }
     };
 

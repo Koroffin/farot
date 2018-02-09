@@ -45,7 +45,7 @@ F.require('classes/word/word', function (Word) {
                 break;
             }
             if (res === Word.prototype.END_STATUS) {
-                if (currentWord.isString() || currentWord.isComma()) {
+                if (currentWord.isString() || currentWord.isComma() || currentWord.isDot()) {
                     // need to increase pointer
                     pointer++
                 } 
@@ -108,6 +108,9 @@ F.require('classes/word/word', function (Word) {
                         F.debug('here increase argumentsCount of ' + currentFunction.function.readedSubstr + ' because met first variable ' + currentWord.readedSubstr);
                         currentFunction.function.argumentsCount++;
                     }
+                    if (!F.isEmpty(operandsStack) && F.last(operandsStack).isDot()) {
+                        currentWord.setType(Word.prototype.STRING_TYPE);
+                    }
                     outputArray.push(currentWord);
                 }
                 currentWord = new Word();
@@ -135,6 +138,9 @@ F.require('classes/word/word', function (Word) {
                 operandsStack.push(currentWord);
             }
         } else if (!currentWord.isUndefined()) {
+            if (!F.isEmpty(operandsStack) && F.last(operandsStack).isDot()) {
+                currentWord.setType(Word.prototype.STRING_TYPE);
+            }
             outputArray.push(currentWord);
         }        
 
