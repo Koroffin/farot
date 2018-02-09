@@ -1,0 +1,21 @@
+{
+    "STRING_MATCH": "'",
+    "STRING_MATCH_DOUBLE": "\"",
+    "DOT": ".",
+    "COMMA": ",",
+    "PLUS": "+",
+    "MINUS": "-",
+    "PERCENT": "%",
+    "MULTIPLE": "*",
+    "DIVIDE": "/",
+    "BRACKET_OPEN": "(",
+    "BRACKET_CLOSE": ")",
+    "VERTICAL_LINE": "|",
+    "AND_SYMBOL": "&",
+    "EXCLAMATION_MARK": "!",
+    "MORE_SIGN": ">",
+    "LESS_SIGN": "<",
+    "EQUAL_SIGN": "=",
+    "COLON": ":",
+    "QUESTION_MARK": "?"
+}

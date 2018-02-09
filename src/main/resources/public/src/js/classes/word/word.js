@@ -1,10 +1,11 @@
 F.define(
-    'json!./operandPriority',
+    './operand',
     './types',
     './statuses',
+    './symbols',
     './helpers',
     'core/assign',
-function (operandPriority, types, statuses, helpers) {
+function (operand, types, statuses, symbols, helpers) {
     'use strict';
 
     function Word () {
@@ -13,74 +14,11 @@ function (operandPriority, types, statuses, helpers) {
         this.readedSubstr = '';
     }
     Word.prototype = F.assign({
-        STRING_MATCH: '\'',
-        STRING_MATCH_DOUBLE: '"',
-
-        DOT: '.',
-        COMMA: ',',
-
-        PLUS: '+',
-        MINUS: '-',
-        PERCENT: '%',
-        MULTIPLE: '*',
-        DIVIDE: '/',
-        BRACKET_OPEN: '(',
-        BRACKET_CLOSE: ')',
-        VERTICAL_LINE: '|',
-        AND_SYMBOL: '&',
-        EXCLAMATION_MARK: '!',
-        MORE_SIGN: '>',
-        LESS_SIGN: '<',
-        EQUAL_SIGN: '=',
-        COLON: ':',
-        QUESTION_MARK: '?',
-
         predefinedVariables: {
             'true': true,
             'false': false,
             'undefined': undefined,
             'Infinity': Infinity
-        },
-
-        defineType: function (symbol) {
-            var isChar = /[a-z]/i.test(symbol);
-            var isNumber = /[0-9]/i.test(symbol);
-            var isWhiteSpace = /\s/.test(symbol);
-
-            if (isNumber) {
-                return this.setType(this.NUMBER_TYPE)
-                    ._addSymbol(symbol)
-                    .ok();
-            } else if (isChar) {
-                return this
-                    .setType(this.VARIABLE_TYPE)
-                    ._addSymbol(symbol)
-                    .ok();
-            } else if (this.isStringMatch(symbol)) {
-                this
-                    .setType(this.STRING_TYPE)
-                        .stringStartedSymbol = symbol;
-                return this.ok();
-            } else if (this.isOperandSymbol(symbol)) {
-                return this
-                    .setType(this.OPERAND_TYPE)
-                    ._addSymbol(symbol)
-                    .ok();
-            } else if (isWhiteSpace) {
-                // ignore it
-                return this.ok();
-            } else if (this.isCommaSymbol(symbol)) {
-                return this
-                    ._addSymbol(symbol)
-                    .end();
-            } else if (this.isDotSymbol(symbol)) {
-                return this
-                    .setType(this.OPERAND_TYPE)
-                    ._addSymbol(symbol)
-                    .end();
-            } else {
-                return this.error('Can not start a word with ' + symbol);
-            }            
         },
 
         _addSymbol: function (symbol) {
@@ -229,29 +167,6 @@ function (operandPriority, types, statuses, helpers) {
                 return helpers.dot;
             }
         },
-        getOperand: function () {
-            return this.readedSubstr;
-        },
-        getOperandPriority: function () {
-            return F.isDefined(operandPriority[this.readedSubstr]) ? operandPriority[this.readedSubstr] : Infinity;
-        },
-        getOperandArgumentsLength: function () {
-            if (F.isDefined(this.argumentsCount)) {
-                return this.argumentsCount;
-            }
-            if (this.isLogicalNot()) {
-                return 1;
-            }
-            if (this.isCondition()) {
-                return 3;
-            }
-            return 2;
-        },
-
-        setType: function (type) {
-            this.type = type;
-            return this;
-        },
 
         last: function () {
             return F.last(this.readedSubstr);
@@ -262,120 +177,8 @@ function (operandPriority, types, statuses, helpers) {
         },
         canAddChar: function () {
             return this.isUndefined() || this.isVariable() || this.isString();
-        },
-
-        isStringMatch: function (symbol) {
-            return (symbol === this.STRING_MATCH) || (symbol === this.STRING_MATCH_DOUBLE);
-        },
-        isDotSymbol: function (symbol) {
-            return symbol === this.DOT;
-        },
-        isCommaSymbol: function (symbol) {
-            return symbol === this.COMMA;
-        },
-        isOpenBracketSymbol: function (symbol) {
-            return symbol === this.BRACKET_OPEN;
-        },
-        isCloseBracketSymbol: function (symbol) {
-            return symbol === this.BRACKET_CLOSE;
-        },
-        isOperandSymbol: function (symbol) {
-            return (
-                (symbol === this.PLUS) ||
-                (symbol === this.MINUS) ||
-                (symbol === this.DIVIDE) ||
-                (symbol === this.MULTIPLE) ||
-                (symbol === this.BRACKET_OPEN) ||
-                (symbol === this.BRACKET_CLOSE) ||
-                (symbol === this.PERCENT) ||
-                (symbol === this.VERTICAL_LINE) ||
-                (symbol === this.AND_SYMBOL) ||
-                (symbol === this.EXCLAMATION_MARK) ||
-                (symbol === this.MORE_SIGN) ||
-                (symbol === this.LESS_SIGN) ||
-                (symbol === this.EQUAL_SIGN) ||
-                (symbol === this.COLON) ||
-                (symbol === this.QUESTION_MARK)
-            );
-        },
-        canAddToOperand: function (symbol) {
-            return (
-                // for logical "and"
-                ((this.readedSubstr === this.AND_SYMBOL) && (symbol === this.AND_SYMBOL)) ||
-                // for logical "or"
-                ((this.readedSubstr === this.VERTICAL_LINE) && (symbol === this.VERTICAL_LINE)) ||
-                // for "=="
-                ((this.readedSubstr === this.EQUAL_SIGN) && (symbol === this.EQUAL_SIGN)) ||
-                // for "==="
-                ((this.readedSubstr === (this.EQUAL_SIGN + this.EQUAL_SIGN)) && (symbol === this.EQUAL_SIGN)) ||
-                // for "<="
-                ((this.readedSubstr === this.LESS_SIGN) && (symbol === this.EQUAL_SIGN)) ||
-                // for ">="
-                ((this.readedSubstr === this.MORE_SIGN) && (symbol === this.EQUAL_SIGN))
-            );
-        },
-
-        isOpenBracket: function () {
-            return this.readedSubstr === this.BRACKET_OPEN;
-        },
-        isCloseBracket: function () {
-            return this.readedSubstr === this.BRACKET_CLOSE;
-        },
-        isPlus: function () {
-            return this.readedSubstr === this.PLUS;
-        },
-        isMinus: function () {
-            return this.readedSubstr === this.MINUS;
-        },
-        isMultiple: function () {
-            return this.readedSubstr === this.MULTIPLE;
-        },
-        isDivide: function () {
-            return this.readedSubstr === this.DIVIDE;
-        },
-        isMod: function () {
-            return this.readedSubstr === this.PERCENT;
-        },
-        isLogicalAnd: function () {
-            return this.readedSubstr === (this.AND_SYMBOL + this.AND_SYMBOL);
-        },
-        isLogicalOr: function () {
-            return this.readedSubstr === (this.VERTICAL_LINE + this.VERTICAL_LINE);
-        },
-        isLogicalNot: function () {
-            return this.readedSubstr === this.EXCLAMATION_MARK;
-        },
-        isComma: function () {
-            return this.readedSubstr === this.COMMA;
-        },
-        isMore: function () {
-            return this.readedSubstr === this.MORE_SIGN;
-        },
-        isMoreOrEqual: function () {
-            return this.readedSubstr === (this.MORE_SIGN + this.EQUAL_SIGN);
-        },
-        isLess: function () {
-            return this.readedSubstr === this.LESS_SIGN;
-        },
-        isLessOrEqual: function () {
-            return this.readedSubstr === (this.LESS_SIGN + this.EQUAL_SIGN);
-        },
-        isEqual: function () {
-            return this.readedSubstr === (this.EQUAL_SIGN + this.EQUAL_SIGN);
-        },
-        isStrictEqual: function () {
-            return this.readedSubstr === (this.EQUAL_SIGN + this.EQUAL_SIGN + this.EQUAL_SIGN);
-        },
-        isColon: function () {
-            return this.readedSubstr === this.COLON;
-        },
-        isQuestionMark: function () {
-            return this.readedSubstr === this.QUESTION_MARK;
-        },
-        isDot: function () {
-            return this.readedSubstr === this.DOT;
         }
-    }, types, statuses);
+    }, types, statuses, symbols, operand);
 
     return Word;
 });

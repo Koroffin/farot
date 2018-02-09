@@ -6,7 +6,7 @@ function (statuses) {
 
 	return F.assign({
         error: function (msg) {
-            F.error(e);
+            F.error(msg);
             return this.ERROR_STATUS;
         },
         ok: function () {
