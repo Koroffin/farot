@@ -1,0 +1,10 @@
+{
+    "UNDEFINED_TYPE": "undefined",
+    "NUMBER_TYPE": "number",
+    "VARIABLE_TYPE": "variable",
+    "STRING_TYPE": "string",
+    "FLOAT_TYPE": "float",
+    "OPERAND_TYPE": "operand",
+    "FUNCTION_TYPE": "function",
+    "CONDITION_TYPE": "condition"
+}

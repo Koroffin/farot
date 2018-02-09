@@ -77,6 +77,16 @@
             return '/src/' + folder + '/' + name + postfixes.pop();
         }
     }
+    function getContextPath (name, context, folder) {
+        // check for relative path
+        if (name[0] === '.') {
+            var contextArr = context.split('/');
+            context = contextArr.slice(0, -1).join('/');
+            return context + '/' + name.substr(2);
+        } else {
+            return folder + '/' + name;
+        }
+    }
     function loadJS (name, callback, postfixes, context) {
         var path, loader;
         path = getLoadPath(name, postfixes, context, 'js');
@@ -96,7 +106,7 @@
                 if (define_match && (define_match.index === 0)) {
                     // add current path as context
                     var last_char_match = /\)[^\)]+$/.exec(plain);
-                    eval(plain.substr(0, last_char_match.index) + ', "js/' + name + '");').then(function (result) {
+                    eval(plain.substr(0, last_char_match.index) + ', "' + getContextPath(name, context, 'js') + '");').then(function (result) {
                         modules[path] = result;
                         next(result);
                     });

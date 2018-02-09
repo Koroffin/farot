@@ -1,8 +1,10 @@
 F.define(
     'json!./operandPriority',
+    './types',
+    './statuses',
     './helpers',
     'core/assign',
-function (operandPriority, helpers) {
+function (operandPriority, types, statuses, helpers) {
     'use strict';
 
     function Word () {
@@ -10,20 +12,7 @@ function (operandPriority, helpers) {
         this.type = this.UNDEFINED_TYPE;
         this.readedSubstr = '';
     }
-    Word.prototype = {
-        UNDEFINED_TYPE: 'undefined',
-        NUMBER_TYPE: 'number',
-        VARIABLE_TYPE: 'variable',
-        STRING_TYPE: 'string',
-        FLOAT_TYPE: 'float',
-        OPERAND_TYPE: 'operand',
-        FUNCTION_TYPE: 'function',
-        CONDITION_TYPE: 'condition',
-
-        ERROR_STATUS: 'error',
-        OK_STATUS: 'ok',
-        END_STATUS: 'end',
-
+    Word.prototype = F.assign({
         STRING_MATCH: '\'',
         STRING_MATCH_DOUBLE: '"',
 
@@ -51,17 +40,6 @@ function (operandPriority, helpers) {
             'false': false,
             'undefined': undefined,
             'Infinity': Infinity
-        },
-
-        error: function (msg) {
-            F.error(e);
-            return this.ERROR_STATUS;
-        },
-        ok: function () {
-            return this.OK_STATUS;
-        },
-        end: function () {
-            return this.END_STATUS;
         },
 
         defineType: function (symbol) {
@@ -337,31 +315,6 @@ function (operandPriority, helpers) {
             );
         },
 
-        isString: function () {
-            return this.type === this.STRING_TYPE;
-        },
-        isUndefined: function () {
-            return this.type === this.UNDEFINED_TYPE;
-        },
-        isNumber: function () {
-            return this.type === this.NUMBER_TYPE;
-        },
-        isVariable: function () {
-            return this.type === this.VARIABLE_TYPE;
-        },
-        isFloat: function () {
-            return this.type === this.FLOAT_TYPE;
-        },
-        isOperand: function () {
-            return this.type === this.OPERAND_TYPE;
-        },
-        isFunction: function () {
-            return this.type === this.FUNCTION_TYPE;
-        },
-        isCondition: function () {
-            return this.type === this.CONDITION_TYPE;
-        },
-
         isOpenBracket: function () {
             return this.readedSubstr === this.BRACKET_OPEN;
         },
@@ -422,7 +375,7 @@ function (operandPriority, helpers) {
         isDot: function () {
             return this.readedSubstr === this.DOT;
         }
-    };
+    }, types, statuses);
 
     return Word;
 });
