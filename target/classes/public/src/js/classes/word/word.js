@@ -1,6 +1,7 @@
 F.define(
     'json!./operandPriority',
     './helpers',
+    'core/assign',
 function (operandPriority, helpers) {
     'use strict';
 
