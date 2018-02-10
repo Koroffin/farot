@@ -19,7 +19,8 @@ function (operand, types, statuses, symbols, helpers) {
             'true': true,
             'false': false,
             'undefined': undefined,
-            'Infinity': Infinity
+            'Infinity': Infinity,
+            'F': F
         },
 
         _addSymbol: function (symbol) {
