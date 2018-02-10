@@ -8,10 +8,11 @@ F.define(
 function (operand, types, statuses, symbols, helpers) {
     'use strict';
 
-    function Word () {
+    function Word (previousWord) {
         this.value = undefined;
         this.type = this.UNDEFINED_TYPE;
         this.readedSubstr = '';
+        this.previousWord = previousWord;
     }
     Word.prototype = F.assign({
         predefinedVariables: {
@@ -46,14 +47,6 @@ function (operand, types, statuses, symbols, helpers) {
             }
 
             if (isWhiteSpace) {
-                return this.end();
-            }
-
-            if (this.isVariable() && this.isOpenBracketSymbol(symbol)) {
-                // it's a function, not variable
-                this
-                    .setType(this.FUNCTION_TYPE)
-                        .argumentsCount = 0;
                 return this.end();
             }
 
@@ -110,11 +103,19 @@ function (operand, types, statuses, symbols, helpers) {
                 return parseFloat(this.readedSubstr, 10);
             }
 
-            if (this.isVariable() || this.isFunction()) {
+            if (this.isVariable()) {
                 if (F.isDefined(this.predefinedVariables[this.readedSubstr])) {
                     return this.predefinedVariables[this.readedSubstr];
                 } else {
-                    return parent[this.readedSubstr];
+                    var result = parent[this.readedSubstr];
+                    if (F.isFunction(result)) {
+                        return {
+                            _caller: result, 
+                            context: parent
+                        };
+                    } else {
+                        return result;
+                    }
                 }                
             }
 
@@ -165,6 +166,9 @@ function (operand, types, statuses, symbols, helpers) {
             }
             if (this.isDot()) {
                 return helpers.dot;
+            }
+            if (this.isFunction()) {
+                return helpers.fn;
             }
         },
 

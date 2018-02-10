@@ -47,7 +47,26 @@ F.define(function () {
 		return c ? b : a;
 	}
 	function dot (a, b) {
-		return b[a];
+		var result = b[a];
+		if (F.isFunction(result)) {
+			return {
+				_caller: result,
+				context: b
+			};
+		} else {
+			return result;
+		}
+	}
+	function fn () {
+		if (F.isEmpty(arguments)) {
+			return F.error('Can not call function without name!');
+		}
+
+		F.debug('here try to call function with arguments ', arguments);
+
+		var args = F.cloneArray(arguments),
+			_fn = args.pop();
+		return _fn._caller.apply(_fn.context, args);
 	}
 
 	return {
@@ -66,6 +85,7 @@ F.define(function () {
 		less: less,
 		lessOrEqual: lessOrEqual,
 		condition: condition,
-		dot: dot
+		dot: dot,
+		fn: fn
 	};
 });
