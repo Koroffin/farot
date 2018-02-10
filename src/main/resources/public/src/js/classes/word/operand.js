@@ -12,7 +12,7 @@ function (operandPriority) {
         },
         getOperandArgumentsLength: function () {
             if (F.isDefined(this.argumentsCount)) {
-                return this.argumentsCount;
+                return this.argumentsCount + 1; // + 1 for the function _caller
             }
             if (this.isLogicalNot()) {
                 return 1;

@@ -82,6 +82,10 @@ F.require('classes/word/word', function (Word) {
                         operandsStack.push(currentWord);
                     }
                 } else if (currentWord.isFunction()) {
+                    // pop untill "." on top
+                    while (!F.isEmpty(operandsStack) && F.last(operandsStack).isDot()) {
+                        outputArray.push(operandsStack.pop());
+                    }
                     operandsStack.push(currentWord);
                     if (F.isDefined(currentFunction) && (currentFunction.function.argumentsCount === 0)) {
                         F.debug('here increase argumentsCount of ' + currentFunction.function.readedSubstr + ' because met the function ' + currentWord.readedSubstr);
@@ -113,7 +117,7 @@ F.require('classes/word/word', function (Word) {
                     }
                     outputArray.push(currentWord);
                 }
-                currentWord = new Word();
+                currentWord = new Word(currentWord);
             } else {
                 pointer++;
             }            

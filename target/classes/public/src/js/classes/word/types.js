@@ -28,6 +28,12 @@ function (types) {
                     .setType(this.STRING_TYPE)
                         .stringStartedSymbol = symbol;
                 return this.ok();
+            } else if (this.isOpenBracketSymbol(symbol) && F.isDefined(this.previousWord) && !this.previousWord.isOperand() && !this.previousWord.isFunction()) {
+                this
+                    .setType(this.FUNCTION_TYPE)
+                        .argumentsCount = 0;
+                this.readedSubstr = this.previousWord.readedSubstr;
+                return this.end();
             } else if (this.isOperandSymbol(symbol)) {
                 return this
                     .setType(this.OPERAND_TYPE)
