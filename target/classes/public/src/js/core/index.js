@@ -1,8 +1,9 @@
 (function (context) {
     'use strict';
-    function F () {
+    
+    var F = {
 
-    }
+    };
 
     /*
         checkers for any case
