@@ -8,10 +8,11 @@ F.define(
 function (operand, types, statuses, symbols, helpers) {
     'use strict';
 
-    function Word () {
+    function Word (previousWord) {
         this.value = undefined;
         this.type = this.UNDEFINED_TYPE;
         this.readedSubstr = '';
+        this.previousWord = previousWord;
     }
     Word.prototype = F.assign({
         predefinedVariables: {

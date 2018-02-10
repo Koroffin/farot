@@ -113,7 +113,7 @@ F.require('classes/word/word', function (Word) {
                     }
                     outputArray.push(currentWord);
                 }
-                currentWord = new Word();
+                currentWord = new Word(currentWord);
             } else {
                 pointer++;
             }            
