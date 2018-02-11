@@ -1,4 +1,4 @@
-package com.farot.controllers;
+package com.farot;
 
 import spark.Request;
 import spark.Response;
@@ -17,14 +17,6 @@ import com.google.gson.Gson;
 import java.util.UUID;
 import java.util.Date;
 import java.util.List;
-
-import com.farot.models.ResponseModel;
-import com.farot.models.AccountModel;
-import com.farot.models.AccountResponseModel;
-
-import com.farot.utils.Sql2oModel;
-import com.farot.utils.RandomString;
-import com.farot.utils.Auth;
 
 public class AccountController {
 
@@ -105,11 +97,11 @@ public class AccountController {
 
             List<AccountModel> models = Sql2oModel.AccountConnector.getByLogin(model.login);
             if (models.size() == 0) {
-                model.id                 = UUID.randomUUID();
+                model.id               = UUID.randomUUID();
                 model.pass             = generateStorngPasswordHash(model.pass);
                 model.token            = RandomString.generateRandomString();
-                model.last_login = new Date();
-                model.user_id        = UUID.randomUUID();
+                model.last_login       = new Date();
+                model.user_id          = UUID.randomUUID();
 
                 System.out.println("Id: " + model.id + " password " + model.pass);
                 

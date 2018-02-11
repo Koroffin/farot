@@ -1,4 +1,4 @@
-package com.farot.constants;
+package com.farot;
 
 public class WebConstants {
 

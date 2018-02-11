@@ -1,4 +1,4 @@
-package com.farot.models;
+package com.farot;
 
 public class ResponseModel {
 

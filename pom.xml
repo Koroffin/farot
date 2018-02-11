@@ -7,6 +7,10 @@
     <name>Farot</name>
     <url>http://maven.apache.org</url>
 
+    <properties>
+        <jar.finalName>Farot</jar.finalName>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -70,10 +74,12 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <finalName>Farot</finalName>
                     <descriptorRefs>
                         <!-- This tells Maven to include all dependencies -->
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
                     <archive>
                         <manifest>
                             <mainClass>com.farot.App</mainClass>

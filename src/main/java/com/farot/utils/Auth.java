@@ -1,14 +1,10 @@
-package com.farot.utils;
+package com.farot;
 
 import spark.Request;
 import spark.Response;
 
 import java.util.Date;
 import java.util.List;
-
-import com.farot.models.AccountModel;
-
-import com.farot.utils.Sql2oModel;
 
 public class Auth {
 

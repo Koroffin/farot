@@ -1,16 +1,9 @@
-package com.farot.controllers;
+package com.farot;
 
 import spark.Request;
 import spark.Response;
 
 import com.google.gson.Gson;
-
-import com.farot.models.ResponseModel;
-import com.farot.models.AccountModel;
-import com.farot.models.AccountResponseModel;
-
-import com.farot.utils.Sql2oModel;
-import com.farot.utils.Auth;
 
 public class UserController {
 

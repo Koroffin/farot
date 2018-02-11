@@ -107,23 +107,24 @@ function (InputAnyChange) {
             this.handled.push(_processForm(forms[i]));
         }
     }
-    function destroy () {
-        var handlers, objects;
-        for (var i=0, l=this.handled.length; i<l; i++) {
-            handlers = this.handled[i].handlers;
-            objects = this.handled[i].objects;
 
-            for (var j=0, _l=handlers.length; j<_l; j++) {
-                F.removeEvent(handlers[j]);
-            }
+    Form.prototype = {
+        destroy: function destroy () {
+            var handlers, objects;
+            for (var i=0, l=this.handled.length; i<l; i++) {
+                handlers = this.handled[i].handlers;
+                objects = this.handled[i].objects;
 
-            for (var k=0, __l=objects.length; k<__l; k++) {
-                objects[k].destroy();
+                for (var j=0, _l=handlers.length; j<_l; j++) {
+                    F.removeEvent(handlers[j]);
+                }
+
+                for (var k=0, __l=objects.length; k<__l; k++) {
+                    objects[k].destroy();
+                }
             }
         }
-    }
-
-    Form.prototype.destroy = destroy;
+    };
 
     return Form;
 });

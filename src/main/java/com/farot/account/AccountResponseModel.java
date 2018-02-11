@@ -1,10 +1,7 @@
-package com.farot.models;
+package com.farot;
 
 import java.util.UUID;
 import java.util.Date;
-
-import com.farot.models.AccountModel;
-import com.farot.models.UserModel;
 
 public class AccountResponseModel {
 
@@ -13,8 +10,8 @@ public class AccountResponseModel {
     public UserModel user;
 
     public AccountResponseModel (AccountModel model) {
-        this.last_login = model.last_login;
-        this.token = model.token;
-        this.user = new UserModel(model);
+        last_login = model.last_login;
+        token = model.token;
+        user = new UserModel(model);
     }
 }

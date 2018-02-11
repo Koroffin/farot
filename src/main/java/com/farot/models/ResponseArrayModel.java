@@ -1,4 +1,4 @@
-package com.farot.models;
+package com.farot;
 
 import java.util.List;
 import java.util.ArrayList;
