@@ -1,4 +1,4 @@
-package com.farot.utils;
+package com.farot;
  
 import java.util.Random;
  

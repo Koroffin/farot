@@ -1,4 +1,4 @@
-package com.farot.utils;
+package com.farot;
 
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
@@ -13,10 +13,6 @@ import java.util.Iterator;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import com.farot.constants.UserConstants;
-import com.farot.utils.Path;
-
-import com.farot.models.AccountModel;
 import com.farot.models.CoordinateModel;
 
 public class Sql2oModel {
