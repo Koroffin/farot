@@ -1,30 +1,25 @@
 F.define(
     'handlers/form',
     'handlers/a',
-    './componentsRender',
+    'classes/component/component',
     'core/assign',
-function (FormHandler, AHandler, componentsRender) {
+    'core/create',
+function (FormHandler, AHandler, Component) {
     'use strict';
     var previousModule;
 
     function Module (options) {
-        this.options = options;
-        return this;
+        return Component.call(this, options);;
     }
-    Module.prototype = F.assign({
+
+    Module.prototype = F.assign(F.create(Component.prototype), {
+        constructor: Component,
         start: function (data, callback) {
             var me = this;
             this.stop();
             previousModule = this;
             this.render(function (element) {
-                me.el = element;
-                me.handlers = [
-                    new FormHandler(me.el),
-                    new AHandler(me.el)
-                ];
-
                 me.append();
-
                 if (F.isFunction(me.options.afterStart)) {
                     me.options.afterStart(me, data, callback);
                 } else {
@@ -32,30 +27,35 @@ function (FormHandler, AHandler, componentsRender) {
                 }
             });
         },
+
         append: function () {
-            F.root.appendChild(this.el);
-        },
-        render: function (callback) {
-            this.renderComponents(callback);
+            F.root.appendChild(this.element);
             return this;
         },
+        remove: function () {
+            F.root.removeChild(this.element);
+            return this;
+        },
+
+        initHandlers: function () {
+            this.handlers = [
+                new FormHandler(this.element),
+                new AHandler(this.element)
+            ];
+        },
+
         stop: function () {
             if (previousModule) {
                 previousModule.destroy();
             }
         },
         destroy: function () {
-            for (var i=0, l=this.handlers.length; i<l; i++) {
-                this.handlers[i].destroy();
-            }
-
-            F.root.removeChild(this.el);
-
-            if (F.isFunction(this.options.afterDestroy)) {
-                this.options.afterDestroy();
-            }
+            this
+                .destroyHandlers()
+                .remove()
+                .afterDestroy();
         }
-    }, componentsRender);
+    });
 
     return Module;
 });
