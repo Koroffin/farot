@@ -13,19 +13,19 @@ function (componentRender) {
             var me      = this,
                 options = this.options;
 
-            this.renderComponents(function (element) {
-                me.element = element;
+            this.renderComponents(function (container) {
+                me.element = container.firstChild;
 
                 // DOM-свойства элемента
                 if (F.isDefined(options.props)) {
                     for (var i = 0, l = options.props.length; i < l; i++) {
-                        F.setAttr(this.element, options.props[i].name, options.props[i].value);
+                        F.setAttr(me.element, options.props[i].name, options.props[i].value);
                     }
                 }
 
                 me.initHandlers();
 
-                callback(element);
+                callback(me.element);
             });
             return this;
         },

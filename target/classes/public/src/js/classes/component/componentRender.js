@@ -15,7 +15,7 @@ function () {
                         component.element.innerHTML = filler.innerHTML;
                     }
 
-                    container.replaceChild(component.element, filler);
+                    filler.parentNode.replaceChild(component.element, filler);
                     
                     callback(null);
                 });
