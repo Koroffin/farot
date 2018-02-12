@@ -10,16 +10,32 @@ import java.util.UUID;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
-
+import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
+
+import java.io.InputStream;
+import java.io.IOException;
 
 import com.farot.models.CoordinateModel;
 
 public class Sql2oModel {
 
+    private static Properties props = loadProperties();
+    private static Properties loadProperties() {
+        Properties result = new Properties();
+        try {
+            //load a properties file from class path, inside static method
+            result.load(Sql2oModel.class.getClassLoader().getResourceAsStream("database.properties"));
+        } 
+        catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return result;
+    }
+
     private static String DB_PATH = 
-        "jdbc:postgresql://" + Path.Database.HOST + ":" + Path.Database.PORT + "/" + Path.Database.DATABASE;
-    private static Sql2o sql2o = new Sql2o(DB_PATH, Path.Database.USER, Path.Database.PASSWORD, new PostgresQuirks() {
+        "jdbc:postgresql://" + props.getProperty("host") + ":" + props.getProperty("port") + "/" + props.getProperty("database");
+    private static Sql2o sql2o = new Sql2o(DB_PATH, props.getProperty("user"), props.getProperty("password"), new PostgresQuirks() {
         {
             // make sure we use default UUID converter.
             converters.put(UUID.class, new UUIDConverter());
