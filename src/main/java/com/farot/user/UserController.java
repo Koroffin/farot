@@ -5,12 +5,16 @@ import spark.Response;
 
 import com.google.gson.Gson;
 
+import static spark.Spark.*;
+
 public class UserController {
 
     private static Gson gson = new Gson();
 
     public UserController () {
-
+        post(WebConstants.api.User.NAME, (req, res) -> { 
+            return UserController.setName(req, res); 
+        }, gson::toJson);
     }
 
     public static Object setName (Request req, Response res)

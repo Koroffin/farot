@@ -5,9 +5,14 @@ import java.io.IOException;
 import java.util.Scanner;
 import java.io.InputStream;
 
+import static spark.Spark.*;
+
 public class IndexController {
 	public IndexController () {
-
+        get("/", "text/html", (req, res) -> IndexController.render());
+        get("/login", "text/html", (req, res) -> IndexController.render());
+        get("/game", "text/html", (req, res) -> IndexController.render());
+        get("/registration", "text/html", (req, res) -> IndexController.render());
 	}
 
     private static URL getResource(String resourceName) {
