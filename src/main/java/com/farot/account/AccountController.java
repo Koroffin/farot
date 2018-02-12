@@ -18,13 +18,26 @@ import java.util.UUID;
 import java.util.Date;
 import java.util.List;
 
+import static spark.Spark.*;
+
 public class AccountController {
 
     private static Gson gson = new Gson();
 
-    public AccountController () 
-    {
-
+    public AccountController () {
+        post(WebConstants.api.Account.DEFAULT, (req, res) -> { 
+            return AccountController.create(req, res); 
+        }, gson::toJson);
+        post(WebConstants.api.Account.AUTH, (req, res) -> { 
+            System.out.println("Post to auth in router!");
+            return AccountController.auth(req, res); 
+        }, gson::toJson);
+        get(WebConstants.api.Account.AUTH, (req, res) -> { 
+            return AccountController.checkAuth(req, res); 
+        }, gson::toJson);
+        post(WebConstants.api.Account.LOGOUT, (req, res) -> { 
+            return AccountController.logout(req, res); 
+        }, gson::toJson);
     }
 
     private static String generateStorngPasswordHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException

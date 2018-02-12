@@ -12,13 +12,10 @@ import java.io.File;
 import java.util.Scanner;
 import java.io.InputStream;
 
-import com.google.gson.Gson;
-
 import static spark.Spark.*;
 
 public class App 
 {
-    private static Gson gson = new Gson();
 
     private static void enableCORS() {
 
@@ -62,29 +59,11 @@ public class App
         });
 
         // Site pages
-        get("/", "text/html", (req, res) -> IndexController.render());
-        get("/login", "text/html", (req, res) -> IndexController.render());
-        get("/game", "text/html", (req, res) -> IndexController.render());
-        get("/registration", "text/html", (req, res) -> IndexController.render());
+        new IndexController();
 
         // API routes
-        post(WebConstants.api.Account.DEFAULT, (req, res) -> { 
-            return AccountController.create(req, res); 
-        }, gson::toJson);
-        post(WebConstants.api.Account.AUTH, (req, res) -> { 
-            System.out.println("Post to auth in router!");
-            return AccountController.auth(req, res); 
-        }, gson::toJson);
-        get(WebConstants.api.Account.AUTH, (req, res) -> { 
-            return AccountController.checkAuth(req, res); 
-        }, gson::toJson);
-        post(WebConstants.api.Account.LOGOUT, (req, res) -> { 
-            return AccountController.logout(req, res); 
-        }, gson::toJson);
-
-        post(WebConstants.api.User.NAME, (req, res) -> { 
-            return UserController.setName(req, res); 
-        }, gson::toJson);
+        new AccountController();
+        new UserController();
 
         // get(WebConstants.api.Map.DEFAULT, (req, res) -> { 
         //     return MapController.get(req, res); 
