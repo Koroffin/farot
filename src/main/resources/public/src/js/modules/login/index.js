@@ -1,6 +1,6 @@
 F.define(
-    'components/module',
-    'components/router',
+    'classes/module/module',
+    'router',
     'plain!./templates/main.html',
     'core/trigger',
     'css!./styles',

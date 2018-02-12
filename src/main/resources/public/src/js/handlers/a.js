@@ -1,4 +1,4 @@
-F.define('components/router', 'core/events', 'core/attr', function (Router) {
+F.define('router', 'core/events', 'core/attr', function (Router) {
     'use strict';
     var A;
 

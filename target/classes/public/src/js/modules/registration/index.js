@@ -1,6 +1,6 @@
 F.define(
-    'components/module',
-    'components/router',
+    'classes/module/module',
+    'router',
     'plain!./templates/index.html',
     'core/trigger',
 function (Module, Router, tpl) {
