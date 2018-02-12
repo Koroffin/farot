@@ -8,16 +8,18 @@ function () {
         _requireComponent: function(container, componentPath, componentAttributes, matchIndex, isSingle) {
             return function (callback) {
                 F.require(componentPath + '/index', function (Component) {
-                    var component = new Component({ props: componentAttributes }).render();
-                    var filler = container.getElementsByClassName('f-component-' + matchIndex)[0];
+                    new Component({ props: componentAttributes })
+                        .render(function (element) {
+                            var filler = container.getElementsByClassName('f-component-' + matchIndex)[0];
 
-                    if (!isSingle) {
-                        component.element.innerHTML = filler.innerHTML;
-                    }
+                            if (!isSingle) {
+                                element.innerHTML = filler.innerHTML;
+                            }
 
-                    filler.parentNode.replaceChild(component.element, filler);
-                    
-                    callback(null);
+                            filler.parentNode.replaceChild(element, filler);
+                            
+                            callback(null);
+                        });
                 });
             }
         },
@@ -44,7 +46,7 @@ function () {
 
                 matchAttributes = matchStr.split(' ');
 
-                componentPath = 'basic/' + matchAttributes[0].replace(/\-/gi, '/');
+                componentPath = 'components/' + matchAttributes[0].replace(/\-/gi, '/');
                 componentAttributes = [ ];
                 for (var i = 1, l = matchAttributes.length; i < l; i++) {
                     matchAttribute = matchAttributes[i].split('=');
