@@ -13,3 +13,5 @@ hs_err_pid*
 
 .sass-cache
 node_modules
+
+src/main/resources/database.properties
