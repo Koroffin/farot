@@ -1,36 +1,10 @@
 F.define(
-    'handlers/form',
-    'handlers/a',
     'core/trim',
-function (FormHandler, AHandler) {
+    'core/eval',
+function () {
     'use strict';
-    var previousModule;
 
-    function Module (options) {
-        this.options = options;
-        return this;
-    }
-    Module.prototype = {
-        start: function (data, callback) {
-            var me = this;
-            this.stop();
-            previousModule = this;
-            this.render(function (element) {
-                me.el = element;
-                me.handlers = [
-                    new FormHandler(me.el),
-                    new AHandler(me.el)
-                ];
-
-                F.root.appendChild(me.el);
-
-                if (F.isFunction(me.options.afterStart)) {
-                    me.options.afterStart(me, data, callback);
-                } else {
-                    callback();
-                }
-            });
-        },
+    return {
         _requireComponent: function(container, componentPath, componentAttributes, matchIndex, isSingle) {
             return function (callback) {
                 F.require(componentPath + '/index', function (Component) {
@@ -47,7 +21,7 @@ function (FormHandler, AHandler) {
                 });
             }
         },
-        render: function (callback) {
+        renderComponents: function (callback) {
             var container, tpl, generatedTpl,
                 re, match, matchStr, matchIndex, matchAttributes, matchAttribute, matchSingle,
                 componentPath, componentAttributes, componentAttributeValue,
@@ -115,24 +89,6 @@ function (FormHandler, AHandler) {
                     callback(container);
                 });
             }
-        },
-        stop: function () {
-            if (previousModule) {
-                previousModule.destroy();
-            }
-        },
-        destroy: function () {
-            for (var i=0, l=this.handlers.length; i<l; i++) {
-                this.handlers[i].destroy();
-            }
-
-            F.root.removeChild(this.el);
-
-            if (F.isFunction(this.options.afterDestroy)) {
-                this.options.afterDestroy();
-            }
         }
     };
-
-    return Module;
 });

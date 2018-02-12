@@ -1,4 +1,4 @@
-F.define('components/router', function (Router) {
+F.define('router', function (Router) {
     'use strict';
     Router.state('login');
     Router.state('game');
