@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "mvn package && java -cp target/Farot.jar com.farot.App"
+    "start": "mvn package && java -cp target/Farot.jar com.farot.App",
+    "start:frontend": "node src/development/server.js",
+    "generate": "plop --plopfile src/development/generators/index.js"
   },
   "repository": {
     "type": "git",
@@ -20,7 +22,8 @@
   "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-contrib-compass": "^1.1.1",
-    "grunt-contrib-watch": "^1.0.0"
+    "grunt-contrib-watch": "^1.0.0",
+    "plop": "^1.9.1"
   },
   "dependencies": {
     "express": "^4.16.2",
