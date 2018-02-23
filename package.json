@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "mvn package && java -cp target/Farot.jar com.farot.App",
     "start:frontend": "node src/development/server.js",
-    "generate": "plop --plopfile src/development/generators/index.js"
+    "generate": "plop --plopfile src/development/generators/index.js",
+    "migrate": "node src/development/migration.js"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,8 @@
   },
   "dependencies": {
     "express": "^4.16.2",
-    "express-http-proxy": "^1.1.0"
+    "express-http-proxy": "^1.1.0",
+    "fs": "0.0.1-security",
+    "pg": "^7.4.1"
   }
 }
