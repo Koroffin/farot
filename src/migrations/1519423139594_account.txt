@@ -1,0 +1,25 @@
+-- generated automaticly (remove it)
+
+-- Table: public.accounts
+
+-- DROP TABLE public.accounts;
+
+CREATE TABLE public.accounts
+(
+    id uuid NOT NULL,
+    login text COLLATE pg_catalog."default" NOT NULL,
+    pass text COLLATE pg_catalog."default" NOT NULL,
+    last_login date,
+    created_at date,
+    updated_at date,
+    user_id uuid,
+    token text COLLATE pg_catalog."default",
+    CONSTRAINT accounts_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+ALTER TABLE public.accounts
+    OWNER to postgres;
