@@ -11,6 +11,9 @@ function (Module, Router, tpl) {
 
     LoginModule = new Module({
         tpl: tpl,
+        initialState: {
+            testString: "TestString"
+        },
         afterStart: function (module, data, callback) {
             offSubmitLoginFormSuccess = F.on('submit:LoginForm:success', function () {
                 Router.navigate('game');

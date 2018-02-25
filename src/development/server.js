@@ -2,6 +2,8 @@ const express = require('express');
 const expressProxy = require('express-http-proxy');
 const app = express();
 
+const { resolve } = require('path');
+
 app.use(express.static('src/main/resources/public/'));
 
 app.use('/api', expressProxy(
@@ -14,7 +16,7 @@ app.use('/api', expressProxy(
 );
 
 app.get('*', (req, res) => {
-  res.sendFile(__dirname + '/src/main/resources/public/index.html');
+  res.sendFile(resolve(__dirname, '../', 'main/resources/public/index.html'));
 });
 
 app.listen(3000, () => {

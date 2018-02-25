@@ -57,7 +57,11 @@ function () {
                         componentAttributeValue = componentAttributeValue.slice(1, -1);
                     } else if (componentAttributeValue[0] === '{') {
                         // state variable, need eval
-                        componentAttributeValue = F.eval(componentAttributeValue.slice(1, -1), this.options);
+                        componentAttributeValue = F.eval(componentAttributeValue.slice(1, -1), {
+                            $options: this.options,
+                            $state: this.state,
+                            $ctrl: this
+                        });
                     }
 
                     componentAttributes.push(
