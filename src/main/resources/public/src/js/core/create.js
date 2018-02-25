@@ -1,8 +1,6 @@
 (function (context) {
     'use strict';
-    var _create = function () {
-       return Object.assign.apply(Object, arguments);
-    }
+
     var _oldCreate = (function() {
         // To save on memory, use a shared constructor
         function Temp() {}
@@ -43,5 +41,5 @@
         };
     })();
 
-    context.create = F.isFunction(Object.create) ? _create : _oldCreate;
+    context.create = F.isFunction(Object.create) ? Object.create.bind(Object) : _oldCreate;
 })(F);

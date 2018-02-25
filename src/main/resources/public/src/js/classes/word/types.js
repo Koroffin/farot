@@ -10,7 +10,7 @@ function (types) {
             return this;
         },
         defineType: function (symbol) {
-            var isChar = /[a-z]/i.test(symbol);
+            var isChar = /[a-z$_]/i.test(symbol);
             var isNumber = /[0-9]/i.test(symbol);
             var isWhiteSpace = /\s/.test(symbol);
 
