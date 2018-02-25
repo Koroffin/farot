@@ -47,7 +47,7 @@ client.connect();
 // end function
 const end = () => {
 	writeFileSync('.migrationStatus.txt', migrationStatus);
-	client.end()
+	client.end();
 }
 
 // iterate function
