@@ -1,10 +1,10 @@
 F.define(
-	'json!./statuses',
-	'core/assign',
+    'json!./statuses',
+    'core/assign',
 function (statuses) {
-	'use strict';
+    'use strict';
 
-	return F.assign({
+    return F.assign({
         error: function (msg) {
             F.error(msg);
             return this.ERROR_STATUS;
@@ -15,5 +15,5 @@ function (statuses) {
         end: function () {
             return this.END_STATUS;
         }
-	}, statuses);
+    }, statuses);
 });

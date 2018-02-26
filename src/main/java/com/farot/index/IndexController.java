@@ -8,12 +8,12 @@ import java.io.InputStream;
 import static spark.Spark.*;
 
 public class IndexController {
-	public IndexController () {
+    public IndexController () {
         get("/", "text/html", (req, res) -> IndexController.render());
         get("/login", "text/html", (req, res) -> IndexController.render());
         get("/game", "text/html", (req, res) -> IndexController.render());
         get("/registration", "text/html", (req, res) -> IndexController.render());
-	}
+    }
 
     private static URL getResource(String resourceName) {
         URL url = Thread.currentThread().getContextClassLoader().getResource(resourceName);
@@ -66,7 +66,7 @@ public class IndexController {
     private static String index = renderIndex();
 
     public static String render() {
-    	return index;
+        return index;
     }
 
 }

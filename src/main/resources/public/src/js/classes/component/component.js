@@ -1,9 +1,10 @@
 F.define(
     './componentRender',
     './state',
+    './inject',
     'core/attr',
     'core/assign',
-function (componentRender, State) {
+function (componentRender, State, inject) {
     'use strict';
     function Component (options) {
         this.options = options;
@@ -12,16 +13,17 @@ function (componentRender, State) {
     }
     Component.prototype = F.assign({
         render: function (callback) {
-            var me      = this,
-                options = this.options;
+            var me           = this,
+                options      = this.options,
+                generatedTpl = this.inject(options.tpl);
 
-            this.renderComponents(function (container) {
+            this.renderComponents(generatedTpl, function (container) {
                 me.element = container.firstChild;
 
                 // DOM-свойства элемента
                 if (F.isDefined(options.props)) {
                     for (var i = 0, l = options.props.length; i < l; i++) {
-                        F.setAttr(me.element, options.props[i].name, options.props[i].value);
+                        me.element[options.props[i].name] = options.props[i].value;
                     }
                 }
 
@@ -58,7 +60,7 @@ function (componentRender, State) {
                 .destroyHandlers()
                 .afterDestroy();
         }
-    }, componentRender, State);
+    }, componentRender, State, inject);
     
     return Component;
 });

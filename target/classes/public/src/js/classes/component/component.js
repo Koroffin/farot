@@ -1,11 +1,13 @@
 F.define(
     './componentRender',
+    './state',
     'core/attr',
     'core/assign',
-function (componentRender) {
+function (componentRender, State) {
     'use strict';
     function Component (options) {
         this.options = options;
+        this.initState();
         return this;
     }
     Component.prototype = F.assign({
@@ -19,7 +21,7 @@ function (componentRender) {
                 // DOM-свойства элемента
                 if (F.isDefined(options.props)) {
                     for (var i = 0, l = options.props.length; i < l; i++) {
-                        F.setAttr(me.element, options.props[i].name, options.props[i].value);
+                        me.element[options.props[i].name] = options.props[i].value;
                     }
                 }
 
@@ -31,10 +33,10 @@ function (componentRender) {
         },
         initHandlers: function () {
             this.handlers = [ ];
-            if (F.isDefined(options.handlers)) {
-                for (var i = 0, l = options.handlers.length; i < l; i++) {
+            if (F.isDefined(this.options.handlers)) {
+                for (var i = 0, l = this.options.handlers.length; i < l; i++) {
                     this.handlers.push(
-                        new options.handlers[i](this.element)
+                        new this.options.handlers[i](this.element)
                     );
                 }
             }
@@ -56,6 +58,7 @@ function (componentRender) {
                 .destroyHandlers()
                 .afterDestroy();
         }
-    }, componentRender);
+    }, componentRender, State);
+    
     return Component;
 });

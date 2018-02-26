@@ -1,16 +1,16 @@
 F.define(
-	'json!./types',
-	'core/assign',
+    'json!./types',
+    'core/assign',
 function (types) {
-	'use strict';
+    'use strict';
 
-	return F.assign({
+    return F.assign({
         setType: function (type) {
             this.type = type;
             return this;
         },
         defineType: function (symbol) {
-            var isChar = /[a-z]/i.test(symbol);
+            var isChar = /[a-z$_]/i.test(symbol);
             var isNumber = /[0-9]/i.test(symbol);
             var isWhiteSpace = /\s/.test(symbol);
 
@@ -79,5 +79,5 @@ function (types) {
         isCondition: function () {
             return this.type === this.CONDITION_TYPE;
         }
-	}, types);
+    }, types);
 });

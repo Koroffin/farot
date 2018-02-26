@@ -1,10 +1,10 @@
 F.define(
-	'json!./symbols',
-	'core/assign',
+    'json!./symbols',
+    'core/assign',
 function (symbols) {
-	'use strict';
+    'use strict';
 
-	return F.assign({
+    return F.assign({
         isStringMatch: function (symbol) {
             return (symbol === this.STRING_MATCH) || (symbol === this.STRING_MATCH_DOUBLE);
         },
@@ -55,5 +55,5 @@ function (symbols) {
                 ((this.readedSubstr === this.MORE_SIGN) && (symbol === this.EQUAL_SIGN))
             );
         }
-	}, symbols);
+    }, symbols);
 });

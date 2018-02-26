@@ -1,9 +1,9 @@
 F.define(
-	'json!./operandPriority',
+    'json!./operandPriority',
 function (operandPriority) {
-	'use strict';
+    'use strict';
 
-	return {
+    return {
         getOperand: function () {
             return this.readedSubstr;
         },

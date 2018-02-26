@@ -1,10 +1,10 @@
 F.define(
-	'json!./types',
-	'core/assign',
+    'json!./types',
+    'core/assign',
 function (types) {
-	'use strict';
+    'use strict';
 
-	return F.assign({
+    return F.assign({
         setType: function (type) {
             this.type = type;
             return this;
@@ -79,5 +79,5 @@ function (types) {
         isCondition: function () {
             return this.type === this.CONDITION_TYPE;
         }
-	}, types);
+    }, types);
 });
