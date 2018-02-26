@@ -12,7 +12,8 @@ function (Module, Router, tpl) {
     LoginModule = new Module({
         tpl: tpl,
         initialState: {
-            testString: "TestString"
+            testString: "TestString",
+            testClass: "f-test"
         },
         afterStart: function (module, data, callback) {
             offSubmitLoginFormSuccess = F.on('submit:LoginForm:success', function () {

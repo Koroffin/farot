@@ -1,16 +1,15 @@
 <div>
-	<form action="account/auth" name="LoginForm">
-	    <input type="text" name="login" placeholder="Username" required>
-	    <input type="password" name="pass" placeholder="Password" required>
-	    <input type="submit" value="Login">
-	</form>
-	<p>
-	    Don't have an account? <a href="#" f-route="registration">Registration</a>.
-	</p>
+    <form action="account/auth" name="LoginForm">
+        <input type="text" name="login" placeholder="Username" required>
+        <input type="password" name="pass" placeholder="Password" required>
+        <input type="submit" value="Login">
+    </form>
+    <p class={$state.testClass}>
+        Don't have an account? <a href="#" f-route="registration">Registration</a>.
+    </p>
 
-
-	<f-input 
-	    name={$state.testString}
-	/>
-	
+    <f-input 
+        name={$state.testString}
+    />
+    
 </div>

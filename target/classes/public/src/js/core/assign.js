@@ -1,8 +1,6 @@
 (function (context) {
     'use strict';
-    function _assign () {
-       return Object.assign.apply(Object, arguments);
-    }
+    
     function _oldAssign (target, varArgs) {
         if (target == null) { // TypeError if undefined or null
             return null;
@@ -25,5 +23,5 @@
         return to;
     }
 
-    context.assign = F.isFunction(Object.assign) ? _assign : _oldAssign;
+    context.assign = F.isFunction(Object.assign) ? Object.assign.bind(Object) : _oldAssign;
 })(F);

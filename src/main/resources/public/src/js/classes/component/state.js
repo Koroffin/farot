@@ -8,17 +8,17 @@ function () {
             // TODO: перерисовывать компонент
         },
         initState: function () {
-        	var state = { };
+            var state = { };
 
-        	if (F.isDefined(this.options.initialState)) {
-        		if (F.isFunction(this.options.initialState)) {
-        			state = this.options.initialState();
-        		} else {
-        			state = this.options.initialState;
-        		}
-        	}
+            if (F.isDefined(this.options.initialState)) {
+                if (F.isFunction(this.options.initialState)) {
+                    state = this.options.initialState();
+                } else {
+                    state = this.options.initialState;
+                }
+            }
 
-        	this.state = state;
+            this.state = state;
         }
     };
 });
