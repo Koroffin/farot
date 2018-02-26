@@ -4,12 +4,12 @@
         <input type="password" name="pass" placeholder="Password" required>
         <input type="submit" value="Login">
     </form>
-    <p class={$state.testClass}>
+    <p class={$state.testClass + ' ' + $state.anotherTestClass + ' f-test3'}>
         Don't have an account? <a href="#" f-route="registration">Registration</a>.
     </p>
 
     <f-input 
-        name={$state.testString}
+        name={$state.innerObj.testString}
     />
     
 </div>

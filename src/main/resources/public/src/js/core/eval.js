@@ -18,7 +18,10 @@ F.require('classes/word/word', function (Word) {
             }
             res.push(value);
         }
-        return res[0];
+        return {
+            result: res[0],
+            stack: stack
+        };
     }
     function __popWhileCondition(operandsStack, outputArray, condition) {
         var operand;
@@ -114,6 +117,9 @@ F.require('classes/word/word', function (Word) {
                     }
                     if (!F.isEmpty(operandsStack) && F.last(operandsStack).isDot()) {
                         currentWord.setType(Word.prototype.STRING_TYPE);
+                        if (!F.isEmpty(outputArray) && F.last(outputArray).isState()) {
+                            currentWord.setAsState();
+                        }
                     }
                     outputArray.push(currentWord);
                 }
@@ -144,6 +150,9 @@ F.require('classes/word/word', function (Word) {
         } else if (!currentWord.isUndefined()) {
             if (!F.isEmpty(operandsStack) && F.last(operandsStack).isDot()) {
                 currentWord.setType(Word.prototype.STRING_TYPE);
+                if (!F.isEmpty(outputArray) && F.last(outputArray).isState()) {
+                    currentWord.setAsState();
+                }
             }
             outputArray.push(currentWord);
         }        
@@ -159,6 +168,7 @@ F.require('classes/word/word', function (Word) {
     }
 
     F.eval = _eval;
+    F.evalStack = _evalStack;
 
     return _eval;
 });

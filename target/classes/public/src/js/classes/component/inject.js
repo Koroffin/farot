@@ -25,7 +25,7 @@ function () {
                 generatedTpl = generatedTpl.substr(0, match.index) + 
                     matchArr[0] +
                     '="' + 
-                    computedValue.result + '"' +
+                    computedValue.value + '"' +
                 generatedTpl.substr(match.index + match[0].length);
             }
 

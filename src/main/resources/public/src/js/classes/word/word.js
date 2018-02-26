@@ -4,8 +4,9 @@ F.define(
     './statuses',
     './symbols',
     './helpers',
+    './state',
     'core/assign',
-function (operand, types, statuses, symbols, helpers) {
+function (operand, types, statuses, symbols, helpers, state) {
     'use strict';
 
     function Word (previousWord) {
@@ -183,7 +184,7 @@ function (operand, types, statuses, symbols, helpers) {
         canAddChar: function () {
             return this.isUndefined() || this.isVariable() || this.isString();
         }
-    }, types, statuses, symbols, operand);
+    }, types, statuses, symbols, operand, state);
 
     return Word;
 });
